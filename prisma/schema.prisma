@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  password        String
+  name            String
+  role            Role             @default(RESIDENT)
+  isActive        Boolean          @default(true)
+  idNumber        String?
+  phone           String?
+  dateOfBirth     String?
+  profileImage    String?
+  pushNotificationsEnabled Boolean @default(true)
+  pushToken       String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  emergencyAlerts EmergencyAlert[]
+  incidentReports IncidentReport[]
+  notifications   Notification[]
+  residentProfile ResidentProfile?
+  securityProfile SecurityProfile?
+  hostedVisits    Visit[]          @relation("Host")
+}
+
+model ResidentProfile {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  unitNumber     String
+  phoneNumber    String?
+  user           User      @relation(fields: [userId], references: [id])
+  assignedSpaces Space[]
+  vehicles       Vehicle[]
+}
+
+model SecurityProfile {
+  id           String  @id @default(uuid())
+  userId       String  @unique
+  checkpointId String?
+  user         User    @relation(fields: [userId], references: [id])
+}
+
+model Vehicle {
+  id                String          @id @default(uuid())
+  licensePlate      String          @unique
+  residentProfileId String
+  model             String?
+  color             String?
+  residentProfile   ResidentProfile @relation(fields: [residentProfileId], references: [id])
+}
+
+model Visitor {
+  id        String   @id @default(uuid())
+  idNumber  String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  visits    Visit[]
+}
+
+model Visit {
+  id              String      @id @default(uuid())
+  hostId          String
+  visitorId       String?
+  visitorName     String?
+  visitorIdNumber String?
+  licensePlate    String?
+  companionCount  Int         @default(0)
+  images          String?
+  status          VisitStatus @default(PENDING)
+  validFrom       DateTime
+  validUntil      DateTime
+  entryTime       DateTime?
+  exitTime        DateTime?
+  qrCode          String      @unique @default(uuid())
+  accessCode      String?     @unique
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  spaceId         String?     @unique
+  space           Space?      @relation("VisitToSpace")
+  visitor         Visitor?    @relation(fields: [visitorId], references: [id])
+  host            User        @relation("Host", fields: [hostId], references: [id])
+}
+
+model IncidentReport {
+  id          String   @id @default(uuid())
+  type        String
+  description String
+  reporterId  String
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  reporter    User     @relation(fields: [reporterId], references: [id])
+}
+
+model EmergencyAlert {
+  id        String   @id @default(uuid())
+  type      String
+  senderId  String
+  location  String?
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  sender    User     @relation(fields: [senderId], references: [id])
+}
+
+model Space {
+  id                String           @id @default(uuid())
+  name              String
+  type              String
+  status            SpaceStatus      @default(AVAILABLE)
+  level             Int              @default(1)
+  vehicleId         String?
+  residentProfileId String?
+  visitId           String?          @unique
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  visit             Visit?           @relation("VisitToSpace", fields: [visitId], references: [id])
+  residentProfile   ResidentProfile? @relation(fields: [residentProfileId], references: [id])
+}
+
+model AccessLog {
+  id          String   @id @default(uuid())
+  visitId     String?
+  plate       String?
+  checkpoint  String
+  direction   String
+  timestamp   DateTime @default(now())
+  snapshotUrl String?
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  RESIDENT
+  SECURITY
+}
+
+enum VisitStatus {
+  PENDING
+  APPROVED
+  CHECKED_IN
+  CHECKED_OUT
+  DENIED
+  EXPIRED
+}
+
+enum SpaceStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  MAINTENANCE
+}
