@@ -17,6 +17,7 @@ async function bootstrap() {
     origin: ['https://frontend-cosevi.vercel.app', 'http://localhost:3000'], // Allow Vercel app and local development
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   await app.listen(process.env.PORT ?? 3000);
