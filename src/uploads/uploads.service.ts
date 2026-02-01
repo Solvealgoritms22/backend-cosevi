@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import sharp from 'sharp';
 
 @Injectable()
 export class UploadsService {
@@ -28,9 +29,6 @@ export class UploadsService {
         const filepath = path.join(this.uploadDir, filename);
 
         try {
-            // Dynamic import for ESM module
-            const sharp = (await import('sharp')).default;
-
             await sharp(file.buffer)
                 .resize(500, 500, { // Resize to standard profile dimension
                     fit: 'cover',
