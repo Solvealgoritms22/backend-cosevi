@@ -73,6 +73,7 @@ model Visit {
   visitorIdNumber String?
   licensePlate    String?
   companionCount  Int         @default(0)
+  isVip           Boolean     @default(false)
   images          String?
   status          VisitStatus @default(PENDING)
   validFrom       DateTime

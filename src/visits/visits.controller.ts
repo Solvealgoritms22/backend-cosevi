@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Request } from '@nestjs/common';
-import { VisitsService } from './visits.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateVisitDto } from './dto/create-visit.dto';
 import { UpdateVisitDto } from './dto/update-visit.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { VisitsService } from './visits.service';
 
 @Controller('visits')
 export class VisitsController {
@@ -45,6 +45,16 @@ export class VisitsController {
     @Post('check-in-code')
     checkInByCode(@Body('accessCode') accessCode: string) {
         return this.visitsService.checkInByCode(accessCode);
+    }
+
+    @Patch(':id/check-out')
+    checkOut(@Param('id') id: string) {
+        return this.visitsService.checkOut(id);
+    }
+
+    @Post('check-out-code')
+    checkOutByCode(@Body('accessCode') accessCode: string) {
+        return this.visitsService.checkOutByCode(accessCode);
     }
 
     @UseGuards(JwtAuthGuard)

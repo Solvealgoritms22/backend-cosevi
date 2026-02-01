@@ -66,6 +66,7 @@ export class VisitsService {
                 status: 'PENDING',
                 accessCode,
                 spaceId: createVisitDto.spaceId,
+                isVip: createVisitDto.isVip || false,
             },
             include: {
                 host: {
@@ -180,16 +181,12 @@ export class VisitsService {
         }
 
         const now = new Date();
-        // Allow check-out even if time window slightly passed, or strictly enforce validUntil?
-        // Usually checkout is allowed after validUntil if they are already inside.
-        // But for check-in strict.
+        if (now < visit.validFrom || now > visit.validUntil) {
+            throw new Error('This pass has expired or is not yet valid');
+        }
 
         if (visit.status === 'CHECKED_IN') {
             return this.checkOut(visit.id);
-        }
-
-        if (now < visit.validFrom || now > visit.validUntil) {
-            throw new Error('This pass has expired or is not yet valid');
         }
 
         if (
@@ -242,13 +239,13 @@ export class VisitsService {
             throw new Error('Invalid Access Code');
         }
 
-        if (visit.status === 'CHECKED_IN') {
-            return this.checkOut(visit.id);
-        }
-
         const now = new Date();
         if (now < visit.validFrom || now > visit.validUntil) {
             throw new Error('Access Code is not valid at this time');
+        }
+
+        if (visit.status === 'CHECKED_IN') {
+            return this.checkOut(visit.id);
         }
 
         if (visit.status === 'CHECKED_OUT') {

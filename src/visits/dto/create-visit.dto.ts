@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateVisitDto {
     @IsUUID()
@@ -33,4 +33,7 @@ export class CreateVisitDto {
     @IsUUID()
     @IsOptional()
     spaceId?: string;
+
+    @IsOptional()
+    isVip?: boolean;
 }
