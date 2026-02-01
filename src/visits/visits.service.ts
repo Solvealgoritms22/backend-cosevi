@@ -180,17 +180,17 @@ export class VisitsService {
             throw new Error('Invalid QR Code');
         }
 
+        if (visit.status === 'CHECKED_IN') {
+            return this.checkOut(visit.id);
+        }
+
         const now = new Date();
         if (now < visit.validFrom || now > visit.validUntil) {
             throw new Error('This pass has expired or is not yet valid');
         }
 
-        if (visit.status === 'CHECKED_IN') {
-            return this.checkOut(visit.id);
-        }
-
         if (
-            visit.status === 'CHECKED_OUT' ||
+            (visit.status === 'CHECKED_OUT' && !visit.isVip) ||
             visit.status === 'EXPIRED' ||
             visit.status === 'DENIED'
         ) {
@@ -239,16 +239,16 @@ export class VisitsService {
             throw new Error('Invalid Access Code');
         }
 
+        if (visit.status === 'CHECKED_IN') {
+            return this.checkOut(visit.id);
+        }
+
         const now = new Date();
         if (now < visit.validFrom || now > visit.validUntil) {
             throw new Error('Access Code is not valid at this time');
         }
 
-        if (visit.status === 'CHECKED_IN') {
-            return this.checkOut(visit.id);
-        }
-
-        if (visit.status === 'CHECKED_OUT') {
+        if (visit.status === 'CHECKED_OUT' && !visit.isVip) {
             throw new Error('This pass has already been used');
         }
 
