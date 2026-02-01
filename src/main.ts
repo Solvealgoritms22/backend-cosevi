@@ -12,11 +12,11 @@ async function bootstrap() {
   }));
 
   // Enable CORS for development
+  // Enable CORS
   app.enableCors({
-    origin: true, // Reflect request origin (useful for development)
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    origin: '*', // Allow all origins (update this with specific domains in production if needed)
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   await app.listen(process.env.PORT ?? 3000);
