@@ -14,7 +14,7 @@ async function bootstrap() {
   // Enable CORS for development
   // Enable CORS
   app.enableCors({
-    origin: '*', // Allow all origins (update this with specific domains in production if needed)
+    origin: ['https://frontend-cosevi.vercel.app', 'http://localhost:3000'], // Allow Vercel app and local development
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
