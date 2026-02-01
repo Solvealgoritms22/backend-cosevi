@@ -1,8 +1,8 @@
 import {
-    WebSocketGateway,
-    WebSocketServer,
     OnGatewayConnection,
     OnGatewayDisconnect,
+    WebSocketGateway,
+    WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
@@ -24,5 +24,9 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     emitVisitUpdate(data: any) {
         this.server.emit('visitUpdate', data);
+    }
+
+    emitStatusUpdate(data: any) {
+        this.server.emit('statusUpdate', data);
     }
 }

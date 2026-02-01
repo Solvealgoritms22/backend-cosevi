@@ -146,8 +146,8 @@ export class VisitsService {
         });
     }
 
-    update(id: string, updateVisitDto: UpdateVisitDto) {
-        return this.prisma.visit.update({
+    async update(id: string, updateVisitDto: UpdateVisitDto) {
+        const updatedVisit = await this.prisma.visit.update({
             where: { id },
             data: {
                 ...updateVisitDto,
@@ -165,6 +165,8 @@ export class VisitsService {
                 space: true,
             },
         });
+        this.gateway.emitVisitUpdate(updatedVisit);
+        return updatedVisit;
     }
 
     async checkIn(qrCode: string) {
@@ -479,9 +481,11 @@ export class VisitsService {
         return updatedVisit;
     }
 
-    remove(id: string) {
-        return this.prisma.visit.delete({
+    async remove(id: string) {
+        const deletedVisit = await this.prisma.visit.delete({
             where: { id },
         });
+        this.gateway.emitVisitUpdate({ ...deletedVisit, status: 'DELETED' });
+        return deletedVisit;
     }
 }
