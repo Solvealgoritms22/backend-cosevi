@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
 import { AppGateway } from '../app.gateway';
+import { PrismaService } from '../prisma.service';
 import { CreateVisitDto } from './dto/create-visit.dto';
 import { UpdateVisitDto } from './dto/update-visit.dto';
 
@@ -58,7 +58,7 @@ export class VisitsService {
                 visitorId: visitor.id,
                 visitorName: createVisitDto.visitorName,
                 visitorIdNumber: createVisitDto.visitorIdNumber,
-                licensePlate: createVisitDto.licensePlate,
+                licensePlate: createVisitDto.licensePlate?.toUpperCase(),
                 companionCount: Number(createVisitDto.companionCount) || 0,
                 images: createVisitDto.images,
                 validFrom: new Date(createVisitDto.validFrom),
@@ -357,7 +357,7 @@ export class VisitsService {
                     data: {
                         status: 'CHECKED_IN',
                         entryTime: now,
-                        licensePlate: data.licensePlate || existingVisit.licensePlate,
+                        licensePlate: data.licensePlate ? data.licensePlate.toUpperCase() : existingVisit.licensePlate,
                         spaceId: data.spaceId || existingVisit.spaceId,
                     },
                     include: {
@@ -400,7 +400,7 @@ export class VisitsService {
                     visitorId: visitor.id,
                     visitorName: data.visitorName,
                     visitorIdNumber: data.visitorIdNumber,
-                    licensePlate: data.licensePlate,
+                    licensePlate: data.licensePlate?.toUpperCase(),
                     companionCount: Number(data.companionCount) || 0,
                     images: data.images,
                     hostId: data.hostId || hostId,

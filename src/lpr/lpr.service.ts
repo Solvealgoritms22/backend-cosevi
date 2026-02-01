@@ -6,9 +6,15 @@ export class LprService {
   constructor(private prisma: PrismaService) { }
 
   async verifyPlate(plate: string) {
-    const visit = await this.prisma.visit.findFirst({
+    const cleanPlate = plate.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
+    // We try to find visits that match the plate string directly, 
+    // or match after removing non-alphanumeric characters.
+    // Since we can't easily normalize the DB column in a standard Prisma query,
+    // we fetch active visits and filter them in memory, or use a broad 'contains'
+
+    const activeVisits = await this.prisma.visit.findMany({
       where: {
-        licensePlate: plate,
         status: { in: ['APPROVED', 'CHECKED_IN'] },
         validFrom: { lte: new Date() },
         validUntil: { gte: new Date() },
@@ -20,22 +26,36 @@ export class LprService {
       },
     });
 
+    const visit = activeVisits.find(v => {
+      if (!v.licensePlate) return false;
+      const dbPlate = v.licensePlate.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+      return dbPlate === cleanPlate || v.licensePlate.toUpperCase() === plate.toUpperCase();
+    });
+
     return {
       found: !!visit,
-      visit: visit || null
+      visit: visit || null,
+      visits: visit ? [visit] : [] // Keep compatibility with frontend expectation
     };
   }
 
   async processPlate(plate: string) {
+    const cleanPlate = plate.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
     // 1. Find active visit for this plate
-    const visit = await this.prisma.visit.findFirst({
+    const activeVisits = await this.prisma.visit.findMany({
       where: {
-        licensePlate: plate,
         status: 'APPROVED',
         validFrom: { lte: new Date() },
         validUntil: { gte: new Date() },
       },
       include: { host: true },
+    });
+
+    const visit = activeVisits.find(v => {
+      if (!v.licensePlate) return false;
+      const dbPlate = v.licensePlate.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+      return dbPlate === cleanPlate || v.licensePlate.toUpperCase() === plate.toUpperCase();
     });
 
     if (!visit) {
