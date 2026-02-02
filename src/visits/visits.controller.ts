@@ -68,6 +68,16 @@ export class VisitsController {
         return this.visitsService.cancel(id);
     }
 
+    @Patch(':id/approve')
+    approve(@Param('id') id: string) {
+        return this.visitsService.approve(id);
+    }
+
+    @Patch(':id/deny')
+    deny(@Param('id') id: string) {
+        return this.visitsService.deny(id);
+    }
+
     @Delete(':id')
     remove(@Param('id') id: string) {
         return this.visitsService.remove(id);

@@ -407,8 +407,9 @@ export class VisitsService {
                     companionCount: Number(data.companionCount) || 0,
                     images: data.images,
                     hostId: data.hostId || hostId,
-                    status: 'CHECKED_IN',
-                    entryTime: now,
+                    status: 'PENDING',
+                    manualEntry: true,
+                    visitorCategory: data.category,
                     validFrom: now,
                     validUntil: new Date(now.getTime() + 86400000),
                     spaceId: data.spaceId,
@@ -476,6 +477,60 @@ export class VisitsService {
                 });
             }
             return v;
+        });
+
+        this.gateway.emitVisitUpdate(updatedVisit);
+        return updatedVisit;
+    }
+
+    async approve(id: string) {
+        const visit = await this.prisma.visit.findUnique({
+            where: { id },
+            include: { space: true }
+        });
+
+        if (!visit) throw new Error('Visit not found');
+        if (visit.status !== 'PENDING') throw new Error('Only pending visits can be approved');
+
+        const updatedVisit = await this.prisma.visit.update({
+            where: { id },
+            data: {
+                status: 'CHECKED_IN',
+                entryTime: new Date(),
+            },
+            include: {
+                host: {
+                    select: { name: true, email: true }
+                },
+                visitor: true,
+                space: true,
+            }
+        });
+
+        this.gateway.emitVisitUpdate(updatedVisit);
+        return updatedVisit;
+    }
+
+    async deny(id: string) {
+        const visit = await this.prisma.visit.findUnique({
+            where: { id },
+        });
+
+        if (!visit) throw new Error('Visit not found');
+        if (visit.status !== 'PENDING') throw new Error('Only pending visits can be denied');
+
+        const updatedVisit = await this.prisma.visit.update({
+            where: { id },
+            data: {
+                status: 'DENIED',
+            },
+            include: {
+                host: {
+                    select: { name: true, email: true }
+                },
+                visitor: true,
+                space: true,
+            }
         });
 
         this.gateway.emitVisitUpdate(updatedVisit);
