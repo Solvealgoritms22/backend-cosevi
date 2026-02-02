@@ -190,7 +190,7 @@ export class VisitsService {
         }
 
         if (
-            (visit.status === 'CHECKED_OUT' && !visit.isVip) ||
+            (visit.status === 'CHECKED_OUT' && visit.singleEntry) ||
             visit.status === 'EXPIRED' ||
             visit.status === 'DENIED'
         ) {
@@ -248,7 +248,7 @@ export class VisitsService {
             throw new Error('Access Code is not valid at this time');
         }
 
-        if (visit.status === 'CHECKED_OUT' && !visit.isVip) {
+        if (visit.status === 'CHECKED_OUT' && visit.singleEntry) {
             throw new Error('This pass has already been used');
         }
 

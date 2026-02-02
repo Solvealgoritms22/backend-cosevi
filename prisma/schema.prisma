@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -74,6 +74,7 @@ model Visit {
   licensePlate    String?
   companionCount  Int         @default(0)
   isVip           Boolean     @default(false)
+  singleEntry     Boolean     @default(false)
   images          String?
   status          VisitStatus @default(PENDING)
   validFrom       DateTime
