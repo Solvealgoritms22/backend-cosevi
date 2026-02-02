@@ -353,6 +353,14 @@ export class VisitsService {
             },
         });
 
+        let accessCode = '';
+        let isUnique = false;
+        while (!isUnique) {
+            accessCode = Math.floor(1000 + Math.random() * 9000).toString();
+            const existing = await this.prisma.visit.findUnique({ where: { accessCode } });
+            if (!existing) isUnique = true;
+        }
+
         const newManualVisit = await this.prisma.$transaction(async (tx) => {
             const v = await tx.visit.create({
                 data: {
@@ -369,6 +377,7 @@ export class VisitsService {
                     validFrom: now,
                     validUntil: new Date(now.getTime() + 86400000),
                     spaceId: data.spaceId,
+                    accessCode,
                 },
                 include: {
                     host: {
