@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { AppGateway } from '../app.gateway';
 import { PrismaService } from '../prisma.service';
-import { CreateReportDto } from './dto/create-report.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { CreateReportDto } from './dto/create-report.dto';
 
 @Injectable()
 export class ReportsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private gateway: AppGateway
+    ) { }
 
     async create(userId: string, createReportDto: CreateReportDto) {
-        return this.prisma.incidentReport.create({
+        const report = await this.prisma.incidentReport.create({
             data: {
                 ...createReportDto,
                 reporterId: userId,
@@ -23,6 +27,8 @@ export class ReportsService {
                 },
             },
         });
+        this.gateway.server.emit('incidentCreated', report);
+        return report;
     }
 
     async findAll() {
@@ -79,7 +85,7 @@ export class ReportsService {
     }
 
     async addComment(incidentReportId: string, authorId: string, createCommentDto: CreateCommentDto) {
-        return this.prisma.incidentComment.create({
+        const comment = await this.prisma.incidentComment.create({
             data: {
                 text: createCommentDto.text,
                 incidentReportId,
@@ -95,12 +101,16 @@ export class ReportsService {
                 },
             },
         });
+        this.gateway.server.emit('commentAdded', { incidentReportId, comment });
+        return comment;
     }
 
     async updateStatus(id: string, status: string) {
-        return this.prisma.incidentReport.update({
+        const report = await this.prisma.incidentReport.update({
             where: { id },
             data: { status },
         });
+        this.gateway.server.emit('incidentStatusUpdated', report);
+        return report;
     }
 }

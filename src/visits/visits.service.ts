@@ -343,50 +343,6 @@ export class VisitsService {
 
     async manualCheckIn(hostId: string, data: any) {
         const now = new Date();
-        const existingVisit = await this.prisma.visit.findFirst({
-            where: {
-                visitorIdNumber: data.visitorIdNumber,
-                status: 'PENDING',
-                validFrom: { lte: now },
-                validUntil: { gte: now },
-            },
-            orderBy: { validUntil: 'asc' },
-        });
-
-        if (existingVisit) {
-            const updatedVisit = await this.prisma.$transaction(async (tx) => {
-                const v = await tx.visit.update({
-                    where: { id: existingVisit.id },
-                    data: {
-                        status: 'CHECKED_IN',
-                        entryTime: now,
-                        licensePlate: data.licensePlate ? data.licensePlate.toUpperCase() : existingVisit.licensePlate,
-                        spaceId: data.spaceId || existingVisit.spaceId,
-                    },
-                    include: {
-                        host: {
-                            select: {
-                                name: true,
-                                email: true,
-                            },
-                        },
-                        visitor: true,
-                        space: true,
-                    },
-                });
-
-                if (v.spaceId) {
-                    await tx.space.update({
-                        where: { id: v.spaceId },
-                        data: { status: 'OCCUPIED' },
-                    });
-                }
-                return v;
-            });
-
-            this.gateway.emitVisitUpdate(updatedVisit);
-            return updatedVisit;
-        }
 
         const visitor = await this.prisma.visitor.upsert({
             where: { idNumber: data.visitorIdNumber },
