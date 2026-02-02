@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateReportDto } from './dto/create-report.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class ReportsService {
@@ -32,6 +33,64 @@ export class ReportsService {
                     select: {
                         name: true,
                         email: true,
+                    },
+                },
+                comments: {
+                    orderBy: { createdAt: 'asc' },
+                    include: {
+                        author: {
+                            select: {
+                                name: true,
+                                role: true,
+                                profileImage: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    async findByUser(userId: string) {
+        return this.prisma.incidentReport.findMany({
+            where: { reporterId: userId },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                reporter: {
+                    select: {
+                        name: true,
+                        email: true,
+                    },
+                },
+                comments: {
+                    orderBy: { createdAt: 'asc' },
+                    include: {
+                        author: {
+                            select: {
+                                name: true,
+                                role: true,
+                                profileImage: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    async addComment(incidentReportId: string, authorId: string, createCommentDto: CreateCommentDto) {
+        return this.prisma.incidentComment.create({
+            data: {
+                text: createCommentDto.text,
+                incidentReportId,
+                authorId,
+            },
+            include: {
+                author: {
+                    select: {
+                        name: true,
+                        role: true,
+                        profileImage: true,
                     },
                 },
             },

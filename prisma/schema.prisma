@@ -28,6 +28,7 @@ model User {
   residentProfile ResidentProfile?
   securityProfile SecurityProfile?
   hostedVisits    Visit[]          @relation("Host")
+  incidentComments IncidentComment[]
 }
 
 model ResidentProfile {
@@ -100,6 +101,7 @@ model IncidentReport {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   reporter    User     @relation(fields: [reporterId], references: [id])
+  comments    IncidentComment[]
 }
 
 model EmergencyAlert {
@@ -166,4 +168,15 @@ enum SpaceStatus {
   OCCUPIED
   RESERVED
   MAINTENANCE
+}
+
+model IncidentComment {
+  id               String         @id @default(uuid())
+  text             String
+  incidentReportId String
+  authorId         String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  author           User           @relation(fields: [authorId], references: [id])
+  incidentReport   IncidentReport @relation(fields: [incidentReportId], references: [id])
 }
