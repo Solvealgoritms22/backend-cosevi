@@ -46,10 +46,17 @@ export class VisitsService {
 
         let accessCode = '';
         let isUnique = false;
-        while (!isUnique) {
-            accessCode = Math.floor(1000 + Math.random() * 9000).toString();
+        let attempts = 0;
+        while (!isUnique && attempts < 10) {
+            accessCode = Math.floor(100000 + Math.random() * 900000).toString();
             const existing = await this.prisma.visit.findUnique({ where: { accessCode } });
             if (!existing) isUnique = true;
+            attempts++;
+        }
+
+        if (!isUnique) {
+            // Fallback to a longer string if 6 digits clash (very unlikely)
+            accessCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
         const newVisit = await this.prisma.visit.create({
@@ -86,7 +93,10 @@ export class VisitsService {
         return newVisit;
     }
 
-    findAll(startDate?: string, endDate?: string) {
+    async findAll(startDate?: string, endDate?: string, page: string = '1', limit: string = '10') {
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const take = parseInt(limit);
+
         const where: any = {};
         if (startDate && endDate) {
             where.createdAt = {
@@ -94,25 +104,44 @@ export class VisitsService {
                 lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
             };
         }
-        return this.prisma.visit.findMany({
-            where,
-            include: {
-                host: {
-                    select: {
-                        name: true,
-                        email: true,
+
+        const [data, total] = await Promise.all([
+            this.prisma.visit.findMany({
+                where,
+                skip,
+                take,
+                include: {
+                    host: {
+                        select: {
+                            name: true,
+                            email: true,
+                        },
                     },
+                    visitor: true,
+                    space: true,
                 },
-                visitor: true,
-                space: true,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            }),
+            this.prisma.visit.count({ where }),
+        ]);
+
+        return {
+            data,
+            meta: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / take),
             },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
+        };
     }
 
-    findByHost(hostId: string, startDate?: string, endDate?: string) {
+    async findByHost(hostId: string, startDate?: string, endDate?: string, page: string = '1', limit: string = '10') {
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const take = parseInt(limit);
+
         const where: any = { hostId };
         if (startDate && endDate) {
             where.createdAt = {
@@ -120,22 +149,60 @@ export class VisitsService {
                 lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
             };
         }
-        return this.prisma.visit.findMany({
-            where,
-            include: {
-                host: {
-                    select: {
-                        name: true,
-                        email: true,
+
+        const [data, total] = await Promise.all([
+            this.prisma.visit.findMany({
+                where,
+                skip,
+                take,
+                include: {
+                    host: {
+                        select: {
+                            name: true,
+                            email: true,
+                        },
                     },
+                    visitor: true,
+                    space: true,
                 },
-                visitor: true,
-                space: true,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            }),
+            this.prisma.visit.count({ where }),
+        ]);
+
+        return {
+            data,
+            meta: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / take),
             },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
+        };
+    }
+
+    async getStats() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const [todayCount, pendingCount] = await Promise.all([
+            this.prisma.visit.count({
+                where: {
+                    createdAt: { gte: today }
+                }
+            }),
+            this.prisma.visit.count({
+                where: { status: 'PENDING' }
+            }),
+        ]);
+
+        return {
+            today: todayCount,
+            pending: pendingCount,
+            flagged: 0 // Placeholder or remove if not applicable
+        };
     }
 
     findOne(id: string) {

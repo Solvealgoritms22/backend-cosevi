@@ -8,7 +8,8 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
     cors: {
-        origin: '*',
+        origin: ['https://frontend-cosevi.vercel.app', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:4200'],
+        credentials: true,
     },
 })
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {

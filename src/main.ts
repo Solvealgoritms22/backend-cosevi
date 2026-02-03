@@ -2,10 +2,22 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Security Hardening
+  app.use(helmet());
+  app.use(rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: 'Too many requests from this IP, please try again after 15 minutes',
+  }));
 
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ limit: '50mb', extended: true }));
@@ -16,13 +28,24 @@ async function bootstrap() {
     transform: true,
   }));
 
-  // Enable CORS for development
-  // Enable CORS
+  const allowedOrigins = [
+    'https://frontend-cosevi.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:4200', // Common local dev port
+  ];
+
   app.enableCors({
-    origin: ['https://frontend-cosevi.vercel.app', 'http://localhost:3000'], // Allow Vercel app and local development
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.some(o => o.startsWith(origin) || origin.startsWith(o))) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   await app.listen(process.env.PORT ?? 3000);

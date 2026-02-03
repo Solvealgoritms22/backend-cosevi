@@ -8,14 +8,19 @@ import { VisitsService } from './visits.service';
 export class VisitsController {
     constructor(private readonly visitsService: VisitsService) { }
 
-    @Post()
-    create(@Body() createVisitDto: CreateVisitDto) {
-        return this.visitsService.create(createVisitDto);
+    @Get()
+    findAll(
+        @Query('startDate') startDate?: string,
+        @Query('endDate') endDate?: string,
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+    ) {
+        return this.visitsService.findAll(startDate, endDate, page, limit);
     }
 
-    @Get()
-    findAll(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
-        return this.visitsService.findAll(startDate, endDate);
+    @Get('stats')
+    getStats() {
+        return this.visitsService.getStats();
     }
 
     @Get('my-visits/:hostId')
@@ -23,8 +28,10 @@ export class VisitsController {
         @Param('hostId') hostId: string,
         @Query('startDate') startDate?: string,
         @Query('endDate') endDate?: string,
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
     ) {
-        return this.visitsService.findByHost(hostId, startDate, endDate);
+        return this.visitsService.findByHost(hostId, startDate, endDate, page, limit);
     }
 
     @Get(':id')
