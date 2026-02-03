@@ -67,6 +67,8 @@ export class VisitsService {
                 accessCode,
                 spaceId: createVisitDto.spaceId,
                 isVip: createVisitDto.isVip || false,
+                singleEntry: createVisitDto.singleEntry || false,
+                visitorCategory: createVisitDto.category,
             },
             include: {
                 host: {

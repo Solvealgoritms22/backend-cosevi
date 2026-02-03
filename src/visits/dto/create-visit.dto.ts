@@ -1,4 +1,5 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import { VisitorCategory } from '@prisma/client';
+import { IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateVisitDto {
     @IsUUID()
@@ -36,4 +37,12 @@ export class CreateVisitDto {
 
     @IsOptional()
     isVip?: boolean;
+
+    @IsBoolean()
+    @IsOptional()
+    singleEntry?: boolean;
+
+    @IsEnum(VisitorCategory)
+    @IsOptional()
+    category?: VisitorCategory;
 }
