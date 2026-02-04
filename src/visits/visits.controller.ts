@@ -8,6 +8,11 @@ import { VisitsService } from './visits.service';
 export class VisitsController {
     constructor(private readonly visitsService: VisitsService) { }
 
+    @Post('create')
+    create(@Body() createVisitDto: CreateVisitDto) {
+        return this.visitsService.create(createVisitDto);
+    }
+
     @Get()
     findAll(
         @Query('startDate') startDate?: string,
