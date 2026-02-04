@@ -93,7 +93,7 @@ export class VisitsService {
         return newVisit;
     }
 
-    async findAll(startDate?: string, endDate?: string, page: string = '1', limit: string = '10') {
+    async findAll(startDate?: string, endDate?: string, page: string = '1', limit: string = '10', search?: string) {
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const take = parseInt(limit);
 
@@ -101,15 +101,25 @@ export class VisitsService {
         if (startDate && endDate) {
             where.createdAt = {
                 gte: new Date(startDate),
-                lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
+                lte: new Date(endDate),
             };
         }
 
-        const [data, total] = await Promise.all([
+        if (search) {
+            where.OR = [
+                { visitorName: { contains: search } },
+                { licensePlate: { contains: search } },
+                { visitorIdNumber: { contains: search } },
+            ];
+        }
+
+        const [total, data] = await Promise.all([
+            this.prisma.visit.count({ where }),
             this.prisma.visit.findMany({
                 where,
                 skip,
                 take,
+                orderBy: { createdAt: 'desc' },
                 include: {
                     host: {
                         select: {
@@ -120,11 +130,7 @@ export class VisitsService {
                     visitor: true,
                     space: true,
                 },
-                orderBy: {
-                    createdAt: 'desc',
-                },
             }),
-            this.prisma.visit.count({ where }),
         ]);
 
         return {

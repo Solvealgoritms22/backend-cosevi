@@ -19,8 +19,9 @@ export class VisitsController {
         @Query('endDate') endDate?: string,
         @Query('page') page?: string,
         @Query('limit') limit?: string,
+        @Query('search') search?: string,
     ) {
-        return this.visitsService.findAll(startDate, endDate, page, limit);
+        return this.visitsService.findAll(startDate, endDate, page, limit, search);
     }
 
     @Get('stats')
