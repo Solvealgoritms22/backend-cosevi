@@ -108,6 +108,7 @@ model IncidentReport {
   id          String   @id @default(uuid())
   type        String
   description String
+  location    String?
   reporterId  String
   status      String   @default("OPEN")
   createdAt   DateTime @default(now())
