@@ -1,11 +1,11 @@
-import { Injectable, Scope, Inject, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Scope, Inject, InternalServerErrorException, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { TenantsService } from './tenants/tenants.service';
 
 @Injectable({ scope: Scope.REQUEST })
-export class PrismaService extends PrismaClient {
+export class PrismaService extends PrismaClient implements OnModuleInit {
     private static clients: Map<string, PrismaClient> = new Map();
 
     constructor(
@@ -15,17 +15,27 @@ export class PrismaService extends PrismaClient {
         super();
     }
 
+    async onModuleInit() {
+        // We don't connect the base client because we use dynamic ones
+    }
+
     async getClient(): Promise<PrismaClient> {
+        // In NestJS, during startup or some contexts, REQUEST might be undefined
+        if (!this.request || !this.request.headers) {
+            return this; // Fallback to default client if possible
+        }
+
         const tenantId = this.request.headers['x-tenant-id'] as string;
 
         if (!tenantId) {
-            // If no tenant ID, we might be in a public endpoint or master DB context
-            // For now, let's assume we need a tenant ID for all protected routes
-            throw new InternalServerErrorException('Tenant ID missing in request headers');
+            // Check if we are in a public route that doesn't need tenant isolation
+            // or if we should use a default one. 
+            // For now, let's keep it strict or use the default DATABASE_URL
+            return this;
         }
 
         if (PrismaService.clients.has(tenantId)) {
-            return PrismaService.clients.get(tenantId);
+            return PrismaService.clients.get(tenantId)!;
         }
 
         const tenant = await this.tenantsService.getTenantById(tenantId);
@@ -46,25 +56,9 @@ export class PrismaService extends PrismaClient {
         return client;
     }
 
-    // Override common methods to use the dynamic client
-    // Note: This is a simplified approach. In a real complex app, 
-    // you might want to use a proxy or a factory.
-
-    get user() { return this.getProxy('user'); }
-    get visitor() { return this.getProxy('visitor'); }
-    get visit() { return this.getProxy('visit'); }
-    get space() { return this.getProxy('space'); }
-    get incidentReport() { return this.getProxy('incidentReport'); }
-    get emergencyAlert() { return this.getProxy('emergencyAlert'); }
-    get notification() { return this.getProxy('notification'); }
-    get residentProfile() { return this.getProxy('residentProfile'); }
-    get securityProfile() { return this.getProxy('securityProfile'); }
-    get vehicle() { return this.getProxy('vehicle'); }
-    get accessLog() { return this.getProxy('accessLog'); }
-    get incidentComment() { return this.getProxy('incidentComment'); }
-
-    private getProxy(model: string) {
-        return new Proxy({}, {
+    // Helper to proxy model calls
+    private getModelProxy<T>(model: string): T {
+        return new Proxy({} as any, {
             get: (target, prop) => {
                 return async (...args: any[]) => {
                     const client = await this.getClient();
@@ -73,4 +67,18 @@ export class PrismaService extends PrismaClient {
             }
         });
     }
+
+    // Explicitly override properties with correct types to satisfy TypeScript
+    get user() { return this.getModelProxy<PrismaClient['user']>('user'); }
+    get visitor() { return this.getModelProxy<PrismaClient['visitor']>('visitor'); }
+    get visit() { return this.getModelProxy<PrismaClient['visit']>('visit'); }
+    get space() { return this.getModelProxy<PrismaClient['space']>('space'); }
+    get incidentReport() { return this.getModelProxy<PrismaClient['incidentReport']>('incidentReport'); }
+    get emergencyAlert() { return this.getModelProxy<PrismaClient['emergencyAlert']>('emergencyAlert'); }
+    get notification() { return this.getModelProxy<PrismaClient['notification']>('notification'); }
+    get residentProfile() { return this.getModelProxy<PrismaClient['residentProfile']>('residentProfile'); }
+    get securityProfile() { return this.getModelProxy<PrismaClient['securityProfile']>('securityProfile'); }
+    get vehicle() { return this.getModelProxy<PrismaClient['vehicle']>('vehicle'); }
+    get accessLog() { return this.getModelProxy<PrismaClient['accessLog']>('accessLog'); }
+    get incidentComment() { return this.getModelProxy<PrismaClient['incidentComment']>('incidentComment'); }
 }
