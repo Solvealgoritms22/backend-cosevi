@@ -57,6 +57,8 @@ export class CreateUserDto {
 
     @IsString()
     @IsOptional()
+    plan?: string;
+
     @IsString()
     @IsOptional()
     level?: string;
