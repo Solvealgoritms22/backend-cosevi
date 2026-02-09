@@ -14,6 +14,10 @@ async function bootstrap() {
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   }));
+
+  // Enable trust proxy for rate limiting behind load balancers/proxies (like Render)
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.use(rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 1000, // Limit each IP to 1000 requests per windowMs
