@@ -63,53 +63,54 @@ export class AuthService {
 
         if (userData.role === 'ADMIN' && organizationName) {
             try {
-                // Generate a simple subdomain from org name
+                console.log(`[AuthService] Creating tenant for: ${organizationName}`);
                 const subdomain = organizationName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-                // Check if subdomain exists
-                const existing = await this.tenantsService.getTenantById(subdomain); // This is wrong, should be by subdomain
-                // For simplicity in this prototype, let's just create it with a random part if needed
-
-                // IMPORTANT: In a real system, we'd provision a unique DB. 
-                // For now, we'll use the same DB but eventually this would be unique.
                 const newTenant = await this.tenantsService.createTenant({
                     name: organizationName,
-                    subdomain: subdomain + '-' + Math.random().toString(36).substring(7),
-                    dbUrl: process.env.DATABASE_URL || 'file:./dev.db', // Fallback to shared for now
+                    subdomain: `${subdomain}-${Math.random().toString(36).substring(7)}`,
+                    dbUrl: process.env.DATABASE_URL || 'file:./dev.db',
                     plan: plan || 'starter'
                 });
 
                 tenantId = newTenant.id;
+                console.log(`[AuthService] Tenant created: ${tenantId}`);
             } catch (error) {
-                console.error('Failed to create tenant:', error);
-                throw new InternalServerErrorException('Failed to initialize organization');
+                console.error('[AuthService] Tenant creation failed:', error);
+                throw new InternalServerErrorException('Error initializing organization: ' + error.message);
             }
+        } else {
+            console.log('[AuthService] Standard registration (no tenant created)', { role: userData.role, hasOrg: !!organizationName });
         }
 
         // 2. Set the tenant-id header for this specific registration request 
-        // if we just created one, so UsersService.create uses the right DB
-        if (tenantId) {
-            // We manually pass it to usersService or let usersService handle it.
-            // Since PrismaService is REQUEST scoped, we can't easily change the header mid-request
-            // unless we modify the request object.
+        if (tenantId && (this.prisma as any).request) {
             (this.prisma as any).request.headers['x-tenant-id'] = tenantId;
         }
 
-        const user = await this.usersService.create(userData as CreateUserDto);
+        try {
+            const user = await this.usersService.create(userData as CreateUserDto);
 
-        const payload = {
-            email: user.email,
-            sub: user.id,
-            role: user.role,
-            tenantId: tenantId,
-            residentProfileId: (user as any).residentProfile?.id,
-        };
+            const payload = {
+                email: user.email,
+                sub: user.id,
+                role: user.role,
+                tenantId: tenantId,
+                residentProfileId: (user as any).residentProfile?.id,
+            };
 
-        return {
-            access_token: this.jwtService.sign(payload),
-            user,
-            tenantId
-        };
+            return {
+                access_token: this.jwtService.sign(payload),
+                user,
+                tenantId
+            };
+        } catch (error) {
+            console.error('[AuthService] User creation failed:', error);
+            if (error.code === 'P2002' || error.message?.includes('Unique constraint')) {
+                throw new BadRequestException('The email address is already registered.');
+            }
+            throw error;
+        }
     }
 
     async getProfile(userId: string) {

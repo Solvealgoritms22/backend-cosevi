@@ -50,4 +50,12 @@ export class CreateUserDto {
     @IsString()
     @IsOptional()
     pushToken?: string;
+
+    @IsString()
+    @IsOptional()
+    organizationName?: string;
+
+    @IsString()
+    @IsOptional()
+    plan?: string;
 }
