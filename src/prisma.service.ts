@@ -8,6 +8,9 @@ import { TenantsService } from './tenants/tenants.service';
 export class PrismaService extends PrismaClient implements OnModuleInit {
     private static clients: Map<string, PrismaClient> = new Map();
 
+    // We use a separate default client to avoid infinite recursion when no tenant is present
+    private static defaultClient: PrismaClient = new PrismaClient();
+
     constructor(
         @Inject(REQUEST) private request: Request,
         private tenantsService: TenantsService,
@@ -16,22 +19,19 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     }
 
     async onModuleInit() {
-        // We don't connect the base client because we use dynamic ones
+        // Base client doesn't need to connect as we use defaultClient or dynamic ones
     }
 
     async getClient(): Promise<PrismaClient> {
-        // In NestJS, during startup or some contexts, REQUEST might be undefined
+        // In some contexts (like migrations or seeds), request might be undefined
         if (!this.request || !this.request.headers) {
-            return this; // Fallback to default client if possible
+            return PrismaService.defaultClient;
         }
 
         const tenantId = this.request.headers['x-tenant-id'] as string;
 
         if (!tenantId) {
-            // Check if we are in a public route that doesn't need tenant isolation
-            // or if we should use a default one. 
-            // For now, let's keep it strict or use the default DATABASE_URL
-            return this;
+            return PrismaService.defaultClient;
         }
 
         if (PrismaService.clients.has(tenantId)) {
@@ -40,7 +40,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
         const tenant = await this.tenantsService.getTenantById(tenantId);
         if (!tenant) {
-            throw new InternalServerErrorException('Tenant not found');
+            // If tenant not found, fallback to default or throw
+            return PrismaService.defaultClient;
         }
 
         const client = new PrismaClient({
@@ -56,7 +57,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         return client;
     }
 
-    // Helper to proxy model calls
+    // Proxy helper that avoids recursion by calling models on the resolved client
     private getModelProxy<T>(model: string): T {
         return new Proxy({} as any, {
             get: (target, prop) => {
@@ -68,7 +69,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         });
     }
 
-    // Explicitly override properties with correct types to satisfy TypeScript
+    // Override model getters with Proxies to the current tenant's client
     get user() { return this.getModelProxy<PrismaClient['user']>('user'); }
     get visitor() { return this.getModelProxy<PrismaClient['visitor']>('visitor'); }
     get visit() { return this.getModelProxy<PrismaClient['visit']>('visit'); }
