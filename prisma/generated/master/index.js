@@ -141,6 +141,10 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -148,7 +152,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../..",
@@ -167,8 +171,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"./generated/master\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"MASTER_DATABASE_URL\")\n}\n\nmodel Tenant {\n  id        String   @id @default(uuid())\n  name      String\n  subdomain String   @unique\n  dbUrl     String\n  plan      String   @default(\"starter\")\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  isActive  Boolean  @default(true)\n}\n",
-  "inlineSchemaHash": "a0a55200296cd4d777a422531ec0596654de628ab7437c3d45d164d1bc567134",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/master\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"MASTER_DATABASE_URL\")\n}\n\nmodel Tenant {\n  id        String   @id @default(uuid())\n  name      String\n  subdomain String   @unique\n  dbUrl     String\n  plan      String   @default(\"starter\")\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  isActive  Boolean  @default(true)\n}\n",
+  "inlineSchemaHash": "94b48e74b880a7ba692ce2f227a24b199d96bf687f948573007048c3fb8ce3fe",
   "copyEngine": true
 }
 
@@ -209,6 +213,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "prisma/generated/master/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-debian-openssl-3.0.x.so.node");
+path.join(process.cwd(), "prisma/generated/master/libquery_engine-debian-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "prisma/generated/master/schema.prisma")
