@@ -79,7 +79,7 @@ export class AuthService {
     }
 
     async register(registerData: any) {
-        const { organizationName, plan, ...userData } = registerData;
+        const { organizationName, plan, location, ...userData } = registerData;
 
         // 1. If it's an ADMIN registration from landing page, create a Tenant
         let tenantId: string | undefined;
@@ -93,7 +93,8 @@ export class AuthService {
                     name: organizationName,
                     subdomain: `${subdomain}-${Math.random().toString(36).substring(7)}`,
                     dbUrl: process.env.DATABASE_URL || 'file:./dev.db',
-                    plan: plan || 'starter'
+                    plan: plan || 'starter',
+                    location: location
                 });
 
                 tenantId = newTenant.id;

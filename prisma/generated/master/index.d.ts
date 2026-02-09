@@ -884,6 +884,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     isActive: boolean | null
+    location: string | null
   }
 
   export type TenantMaxAggregateOutputType = {
@@ -899,6 +900,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     isActive: boolean | null
+    location: string | null
   }
 
   export type TenantCountAggregateOutputType = {
@@ -914,6 +916,7 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     isActive: number
+    location: number
     _all: number
   }
 
@@ -931,6 +934,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     isActive?: true
+    location?: true
   }
 
   export type TenantMaxAggregateInputType = {
@@ -946,6 +950,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     isActive?: true
+    location?: true
   }
 
   export type TenantCountAggregateInputType = {
@@ -961,6 +966,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     isActive?: true
+    location?: true
     _all?: true
   }
 
@@ -1049,6 +1055,7 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     isActive: boolean
+    location: string | null
     _count: TenantCountAggregateOutputType | null
     _min: TenantMinAggregateOutputType | null
     _max: TenantMaxAggregateOutputType | null
@@ -1081,6 +1088,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     isActive?: boolean
+    location?: boolean
   }, ExtArgs["result"]["tenant"]>
 
   export type TenantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1096,6 +1104,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     isActive?: boolean
+    location?: boolean
   }, ExtArgs["result"]["tenant"]>
 
   export type TenantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1111,6 +1120,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     isActive?: boolean
+    location?: boolean
   }, ExtArgs["result"]["tenant"]>
 
   export type TenantSelectScalar = {
@@ -1126,9 +1136,10 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     isActive?: boolean
+    location?: boolean
   }
 
-  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "subdomain" | "dbUrl" | "plan" | "apiKey" | "logoUrl" | "primaryColor" | "secondaryColor" | "createdAt" | "updatedAt" | "isActive", ExtArgs["result"]["tenant"]>
+  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "subdomain" | "dbUrl" | "plan" | "apiKey" | "logoUrl" | "primaryColor" | "secondaryColor" | "createdAt" | "updatedAt" | "isActive" | "location", ExtArgs["result"]["tenant"]>
 
   export type $TenantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Tenant"
@@ -1146,6 +1157,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       isActive: boolean
+      location: string | null
     }, ExtArgs["result"]["tenant"]>
     composites: {}
   }
@@ -1581,6 +1593,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"Tenant", 'DateTime'>
     readonly updatedAt: FieldRef<"Tenant", 'DateTime'>
     readonly isActive: FieldRef<"Tenant", 'Boolean'>
+    readonly location: FieldRef<"Tenant", 'String'>
   }
     
 
@@ -1973,7 +1986,8 @@ export namespace Prisma {
     secondaryColor: 'secondaryColor',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    isActive: 'isActive'
+    isActive: 'isActive',
+    location: 'location'
   };
 
   export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
@@ -2076,6 +2090,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     isActive?: BoolFilter<"Tenant"> | boolean
+    location?: StringNullableFilter<"Tenant"> | string | null
   }
 
   export type TenantOrderByWithRelationInput = {
@@ -2091,6 +2106,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
+    location?: SortOrderInput | SortOrder
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -2109,6 +2125,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     isActive?: BoolFilter<"Tenant"> | boolean
+    location?: StringNullableFilter<"Tenant"> | string | null
   }, "id" | "subdomain" | "apiKey">
 
   export type TenantOrderByWithAggregationInput = {
@@ -2124,6 +2141,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
+    location?: SortOrderInput | SortOrder
     _count?: TenantCountOrderByAggregateInput
     _max?: TenantMaxOrderByAggregateInput
     _min?: TenantMinOrderByAggregateInput
@@ -2145,6 +2163,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
     isActive?: BoolWithAggregatesFilter<"Tenant"> | boolean
+    location?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
   }
 
   export type TenantCreateInput = {
@@ -2160,6 +2179,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isActive?: boolean
+    location?: string | null
   }
 
   export type TenantUncheckedCreateInput = {
@@ -2175,6 +2195,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isActive?: boolean
+    location?: string | null
   }
 
   export type TenantUpdateInput = {
@@ -2190,6 +2211,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TenantUncheckedUpdateInput = {
@@ -2205,6 +2227,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TenantCreateManyInput = {
@@ -2220,6 +2243,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isActive?: boolean
+    location?: string | null
   }
 
   export type TenantUpdateManyMutationInput = {
@@ -2235,6 +2259,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TenantUncheckedUpdateManyInput = {
@@ -2250,6 +2275,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -2316,6 +2342,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
+    location?: SortOrder
   }
 
   export type TenantMaxOrderByAggregateInput = {
@@ -2331,6 +2358,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
+    location?: SortOrder
   }
 
   export type TenantMinOrderByAggregateInput = {
@@ -2346,6 +2374,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
+    location?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {

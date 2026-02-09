@@ -105,7 +105,8 @@ exports.Prisma.TenantScalarFieldEnum = {
   secondaryColor: 'secondaryColor',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  isActive: 'isActive'
+  isActive: 'isActive',
+  location: 'location'
 };
 
 exports.Prisma.SortOrder = {
@@ -170,6 +171,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -178,13 +180,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/master\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"MASTER_DATABASE_URL\")\n}\n\nmodel Tenant {\n  id             String   @id @default(uuid())\n  name           String\n  subdomain      String   @unique\n  dbUrl          String\n  plan           String   @default(\"starter\")\n  apiKey         String?  @unique @default(cuid())\n  logoUrl        String?\n  primaryColor   String?  @default(\"#4f46e5\")\n  secondaryColor String?  @default(\"#1e293b\")\n  createdAt      DateTime @default(now())\n  updatedAt      DateTime @updatedAt\n  isActive       Boolean  @default(true)\n}\n",
-  "inlineSchemaHash": "b3bdf95c54106e28946c14136529aebdad4c72c75a1109723789a3029781dbdc",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/master\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"MASTER_DATABASE_URL\")\n}\n\nmodel Tenant {\n  id             String   @id @default(uuid())\n  name           String\n  subdomain      String   @unique\n  dbUrl          String\n  plan           String   @default(\"starter\")\n  apiKey         String?  @unique @default(cuid())\n  logoUrl        String?\n  primaryColor   String?  @default(\"#4f46e5\")\n  secondaryColor String?  @default(\"#1e293b\")\n  createdAt      DateTime @default(now())\n  updatedAt      DateTime @updatedAt\n  isActive       Boolean  @default(true)\n  location       String?\n}\n",
+  "inlineSchemaHash": "a2ec7cf24a7bfdfc912d8356ec6df71a28038620469937ece934039e0ff62574",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Tenant\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subdomain\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dbUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"plan\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"apiKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"logoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"primaryColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"secondaryColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Tenant\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subdomain\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dbUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"plan\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"apiKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"logoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"primaryColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"secondaryColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"location\",\"kind\":\"scalar\",\"type\":\"String\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

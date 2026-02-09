@@ -133,7 +133,8 @@ exports.Prisma.TenantScalarFieldEnum = {
   secondaryColor: 'secondaryColor',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  isActive: 'isActive'
+  isActive: 'isActive',
+  location: 'location'
 };
 
 exports.Prisma.SortOrder = {
