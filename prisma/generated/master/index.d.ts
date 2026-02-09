@@ -877,6 +877,10 @@ export namespace Prisma {
     subdomain: string | null
     dbUrl: string | null
     plan: string | null
+    apiKey: string | null
+    logoUrl: string | null
+    primaryColor: string | null
+    secondaryColor: string | null
     createdAt: Date | null
     updatedAt: Date | null
     isActive: boolean | null
@@ -888,6 +892,10 @@ export namespace Prisma {
     subdomain: string | null
     dbUrl: string | null
     plan: string | null
+    apiKey: string | null
+    logoUrl: string | null
+    primaryColor: string | null
+    secondaryColor: string | null
     createdAt: Date | null
     updatedAt: Date | null
     isActive: boolean | null
@@ -899,6 +907,10 @@ export namespace Prisma {
     subdomain: number
     dbUrl: number
     plan: number
+    apiKey: number
+    logoUrl: number
+    primaryColor: number
+    secondaryColor: number
     createdAt: number
     updatedAt: number
     isActive: number
@@ -912,6 +924,10 @@ export namespace Prisma {
     subdomain?: true
     dbUrl?: true
     plan?: true
+    apiKey?: true
+    logoUrl?: true
+    primaryColor?: true
+    secondaryColor?: true
     createdAt?: true
     updatedAt?: true
     isActive?: true
@@ -923,6 +939,10 @@ export namespace Prisma {
     subdomain?: true
     dbUrl?: true
     plan?: true
+    apiKey?: true
+    logoUrl?: true
+    primaryColor?: true
+    secondaryColor?: true
     createdAt?: true
     updatedAt?: true
     isActive?: true
@@ -934,6 +954,10 @@ export namespace Prisma {
     subdomain?: true
     dbUrl?: true
     plan?: true
+    apiKey?: true
+    logoUrl?: true
+    primaryColor?: true
+    secondaryColor?: true
     createdAt?: true
     updatedAt?: true
     isActive?: true
@@ -1018,6 +1042,10 @@ export namespace Prisma {
     subdomain: string
     dbUrl: string
     plan: string
+    apiKey: string | null
+    logoUrl: string | null
+    primaryColor: string | null
+    secondaryColor: string | null
     createdAt: Date
     updatedAt: Date
     isActive: boolean
@@ -1046,6 +1074,10 @@ export namespace Prisma {
     subdomain?: boolean
     dbUrl?: boolean
     plan?: boolean
+    apiKey?: boolean
+    logoUrl?: boolean
+    primaryColor?: boolean
+    secondaryColor?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isActive?: boolean
@@ -1057,6 +1089,10 @@ export namespace Prisma {
     subdomain?: boolean
     dbUrl?: boolean
     plan?: boolean
+    apiKey?: boolean
+    logoUrl?: boolean
+    primaryColor?: boolean
+    secondaryColor?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isActive?: boolean
@@ -1068,6 +1104,10 @@ export namespace Prisma {
     subdomain?: boolean
     dbUrl?: boolean
     plan?: boolean
+    apiKey?: boolean
+    logoUrl?: boolean
+    primaryColor?: boolean
+    secondaryColor?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isActive?: boolean
@@ -1079,12 +1119,16 @@ export namespace Prisma {
     subdomain?: boolean
     dbUrl?: boolean
     plan?: boolean
+    apiKey?: boolean
+    logoUrl?: boolean
+    primaryColor?: boolean
+    secondaryColor?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isActive?: boolean
   }
 
-  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "subdomain" | "dbUrl" | "plan" | "createdAt" | "updatedAt" | "isActive", ExtArgs["result"]["tenant"]>
+  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "subdomain" | "dbUrl" | "plan" | "apiKey" | "logoUrl" | "primaryColor" | "secondaryColor" | "createdAt" | "updatedAt" | "isActive", ExtArgs["result"]["tenant"]>
 
   export type $TenantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Tenant"
@@ -1095,6 +1139,10 @@ export namespace Prisma {
       subdomain: string
       dbUrl: string
       plan: string
+      apiKey: string | null
+      logoUrl: string | null
+      primaryColor: string | null
+      secondaryColor: string | null
       createdAt: Date
       updatedAt: Date
       isActive: boolean
@@ -1526,6 +1574,10 @@ export namespace Prisma {
     readonly subdomain: FieldRef<"Tenant", 'String'>
     readonly dbUrl: FieldRef<"Tenant", 'String'>
     readonly plan: FieldRef<"Tenant", 'String'>
+    readonly apiKey: FieldRef<"Tenant", 'String'>
+    readonly logoUrl: FieldRef<"Tenant", 'String'>
+    readonly primaryColor: FieldRef<"Tenant", 'String'>
+    readonly secondaryColor: FieldRef<"Tenant", 'String'>
     readonly createdAt: FieldRef<"Tenant", 'DateTime'>
     readonly updatedAt: FieldRef<"Tenant", 'DateTime'>
     readonly isActive: FieldRef<"Tenant", 'Boolean'>
@@ -1915,6 +1967,10 @@ export namespace Prisma {
     subdomain: 'subdomain',
     dbUrl: 'dbUrl',
     plan: 'plan',
+    apiKey: 'apiKey',
+    logoUrl: 'logoUrl',
+    primaryColor: 'primaryColor',
+    secondaryColor: 'secondaryColor',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     isActive: 'isActive'
@@ -1937,6 +1993,14 @@ export namespace Prisma {
   };
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const NullsOrder: {
+    first: 'first',
+    last: 'last'
+  };
+
+  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
   /**
@@ -2005,6 +2069,10 @@ export namespace Prisma {
     subdomain?: StringFilter<"Tenant"> | string
     dbUrl?: StringFilter<"Tenant"> | string
     plan?: StringFilter<"Tenant"> | string
+    apiKey?: StringNullableFilter<"Tenant"> | string | null
+    logoUrl?: StringNullableFilter<"Tenant"> | string | null
+    primaryColor?: StringNullableFilter<"Tenant"> | string | null
+    secondaryColor?: StringNullableFilter<"Tenant"> | string | null
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     isActive?: BoolFilter<"Tenant"> | boolean
@@ -2016,6 +2084,10 @@ export namespace Prisma {
     subdomain?: SortOrder
     dbUrl?: SortOrder
     plan?: SortOrder
+    apiKey?: SortOrderInput | SortOrder
+    logoUrl?: SortOrderInput | SortOrder
+    primaryColor?: SortOrderInput | SortOrder
+    secondaryColor?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
@@ -2024,16 +2096,20 @@ export namespace Prisma {
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     subdomain?: string
+    apiKey?: string
     AND?: TenantWhereInput | TenantWhereInput[]
     OR?: TenantWhereInput[]
     NOT?: TenantWhereInput | TenantWhereInput[]
     name?: StringFilter<"Tenant"> | string
     dbUrl?: StringFilter<"Tenant"> | string
     plan?: StringFilter<"Tenant"> | string
+    logoUrl?: StringNullableFilter<"Tenant"> | string | null
+    primaryColor?: StringNullableFilter<"Tenant"> | string | null
+    secondaryColor?: StringNullableFilter<"Tenant"> | string | null
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     isActive?: BoolFilter<"Tenant"> | boolean
-  }, "id" | "subdomain">
+  }, "id" | "subdomain" | "apiKey">
 
   export type TenantOrderByWithAggregationInput = {
     id?: SortOrder
@@ -2041,6 +2117,10 @@ export namespace Prisma {
     subdomain?: SortOrder
     dbUrl?: SortOrder
     plan?: SortOrder
+    apiKey?: SortOrderInput | SortOrder
+    logoUrl?: SortOrderInput | SortOrder
+    primaryColor?: SortOrderInput | SortOrder
+    secondaryColor?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
@@ -2058,6 +2138,10 @@ export namespace Prisma {
     subdomain?: StringWithAggregatesFilter<"Tenant"> | string
     dbUrl?: StringWithAggregatesFilter<"Tenant"> | string
     plan?: StringWithAggregatesFilter<"Tenant"> | string
+    apiKey?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    logoUrl?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    primaryColor?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    secondaryColor?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
     isActive?: BoolWithAggregatesFilter<"Tenant"> | boolean
@@ -2069,6 +2153,10 @@ export namespace Prisma {
     subdomain: string
     dbUrl: string
     plan?: string
+    apiKey?: string | null
+    logoUrl?: string | null
+    primaryColor?: string | null
+    secondaryColor?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     isActive?: boolean
@@ -2080,6 +2168,10 @@ export namespace Prisma {
     subdomain: string
     dbUrl: string
     plan?: string
+    apiKey?: string | null
+    logoUrl?: string | null
+    primaryColor?: string | null
+    secondaryColor?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     isActive?: boolean
@@ -2091,6 +2183,10 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     dbUrl?: StringFieldUpdateOperationsInput | string
     plan?: StringFieldUpdateOperationsInput | string
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -2102,6 +2198,10 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     dbUrl?: StringFieldUpdateOperationsInput | string
     plan?: StringFieldUpdateOperationsInput | string
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -2113,6 +2213,10 @@ export namespace Prisma {
     subdomain: string
     dbUrl: string
     plan?: string
+    apiKey?: string | null
+    logoUrl?: string | null
+    primaryColor?: string | null
+    secondaryColor?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     isActive?: boolean
@@ -2124,6 +2228,10 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     dbUrl?: StringFieldUpdateOperationsInput | string
     plan?: StringFieldUpdateOperationsInput | string
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -2135,6 +2243,10 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     dbUrl?: StringFieldUpdateOperationsInput | string
     plan?: StringFieldUpdateOperationsInput | string
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -2155,6 +2267,21 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -2171,12 +2298,21 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
+  }
+
   export type TenantCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     subdomain?: SortOrder
     dbUrl?: SortOrder
     plan?: SortOrder
+    apiKey?: SortOrder
+    logoUrl?: SortOrder
+    primaryColor?: SortOrder
+    secondaryColor?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
@@ -2188,6 +2324,10 @@ export namespace Prisma {
     subdomain?: SortOrder
     dbUrl?: SortOrder
     plan?: SortOrder
+    apiKey?: SortOrder
+    logoUrl?: SortOrder
+    primaryColor?: SortOrder
+    secondaryColor?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
@@ -2199,6 +2339,10 @@ export namespace Prisma {
     subdomain?: SortOrder
     dbUrl?: SortOrder
     plan?: SortOrder
+    apiKey?: SortOrder
+    logoUrl?: SortOrder
+    primaryColor?: SortOrder
+    secondaryColor?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isActive?: SortOrder
@@ -2220,6 +2364,24 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -2248,6 +2410,10 @@ export namespace Prisma {
     set?: string
   }
 
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -2268,6 +2434,20 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -2312,6 +2492,34 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {

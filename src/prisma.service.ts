@@ -82,4 +82,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     get vehicle() { return this.getModelProxy<PrismaClient['vehicle']>('vehicle'); }
     get accessLog() { return this.getModelProxy<PrismaClient['accessLog']>('accessLog'); }
     get incidentComment() { return this.getModelProxy<PrismaClient['incidentComment']>('incidentComment'); }
+    get hardwareDevice() { return this.getModelProxy<any>('hardwareDevice'); }
+    get hardwareEvent() { return this.getModelProxy<any>('hardwareEvent'); }
 }

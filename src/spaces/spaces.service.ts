@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { QuotasService } from '../tenants/quotas.service';
 import { CreateSpaceDto } from './dto/create-space.dto';
 import { UpdateSpaceDto } from './dto/update-space.dto';
 
 @Injectable()
 export class SpacesService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private quotasService: QuotasService,
+    ) { }
 
-    create(createSpaceDto: CreateSpaceDto) {
+    async create(createSpaceDto: CreateSpaceDto) {
+        await this.quotasService.checkQuota('parking');
         return this.prisma.space.create({
             data: createSpaceDto,
         });

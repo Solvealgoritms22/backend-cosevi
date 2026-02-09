@@ -2,14 +2,15 @@ import { Controller, Get, Post, Body, Param, Patch, UseGuards, Request } from '@
 import { EmergenciesService } from './emergencies.service';
 import { CreateEmergencyDto } from './dto/create-emergency.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PlanGuard, Plan, PLANS } from '../auth/guards/plan.guard';
 
 @Controller('emergencies')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PlanGuard)
 export class EmergenciesController {
     constructor(private readonly emergenciesService: EmergenciesService) { }
 
-    @UseGuards(JwtAuthGuard)
     @Post()
+    @Plan(PLANS.PREMIUM)
     create(@Request() req, @Body() createEmergencyDto: CreateEmergencyDto) {
         return this.emergenciesService.create(req.user.userId, createEmergencyDto);
     }

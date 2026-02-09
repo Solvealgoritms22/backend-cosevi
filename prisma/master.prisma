@@ -15,6 +15,10 @@ model Tenant {
   subdomain   String   @unique
   dbUrl       String
   plan        String   @default("starter")
+  apiKey      String?  @unique @default(cuid())
+  logoUrl     String?
+  primaryColor String? @default("#4f46e5")
+  secondaryColor String? @default("#1e293b")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)

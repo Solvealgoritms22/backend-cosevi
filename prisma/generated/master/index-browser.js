@@ -127,6 +127,10 @@ exports.Prisma.TenantScalarFieldEnum = {
   subdomain: 'subdomain',
   dbUrl: 'dbUrl',
   plan: 'plan',
+  apiKey: 'apiKey',
+  logoUrl: 'logoUrl',
+  primaryColor: 'primaryColor',
+  secondaryColor: 'secondaryColor',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isActive: 'isActive'
@@ -140,6 +144,11 @@ exports.Prisma.SortOrder = {
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
 };
 
 

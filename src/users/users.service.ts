@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { AppGateway } from '../app.gateway';
 import { PrismaService } from '../prisma.service';
+import { QuotasService } from '../tenants/quotas.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -12,9 +13,19 @@ export class UsersService {
     constructor(
         private prisma: PrismaService,
         private gateway: AppGateway,
+        private quotasService: QuotasService,
     ) { }
 
     async create(createUserDto: CreateUserDto) {
+        // Enforce plan quotas
+        if (createUserDto.role === 'RESIDENT') {
+            await this.quotasService.checkQuota('units');
+        } else if (createUserDto.role === 'SECURITY') {
+            await this.quotasService.checkQuota('security');
+        } else if (createUserDto.role === 'ADMIN') {
+            await this.quotasService.checkQuota('monitors');
+        }
+
         const { unitNumber, assignedSpaceIds, ...userData } = createUserDto;
         const hashedPassword = await bcrypt.hash(userData.password, 10);
 

@@ -42,16 +42,39 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        const tenantId = (this.prisma as any).request.headers['x-tenant-id'];
+        let tenantInfo = null;
+
+        if (tenantId) {
+            const tenant = await this.tenantsService.getTenantById(tenantId) as any;
+            if (tenant) {
+                tenantInfo = {
+                    id: tenant.id,
+                    name: tenant.name,
+                    plan: tenant.plan,
+                    branding: {
+                        logo: tenant.logoUrl,
+                        primaryColor: tenant.primaryColor,
+                        secondaryColor: tenant.secondaryColor,
+                    },
+                    apiKey: tenant.apiKey,
+                };
+            }
+        }
+
         const payload = {
             email: user.email,
             sub: user.id,
             role: user.role,
+            tenantId: tenantId,
+            plan: tenantInfo?.plan || 'starter',
             residentProfileId: user.residentProfile?.id,
         };
 
         return {
             access_token: this.jwtService.sign(payload),
             user,
+            tenant: tenantInfo,
         };
     }
 

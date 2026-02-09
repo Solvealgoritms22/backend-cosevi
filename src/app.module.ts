@@ -15,6 +15,7 @@ import { ReportsModule } from './reports/reports.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { SocketModule } from './socket.module';
 import { TenantsModule } from './tenants/tenants.module';
+import { HardwareModule } from './hardware/hardware.module';
 import { Request, Response, NextFunction } from 'express';
 
 @Module({
@@ -35,6 +36,7 @@ import { Request, Response, NextFunction } from 'express';
         SocketModule,
         UploadsModule,
         TenantsModule,
+        HardwareModule,
     ],
     controllers: [AppController],
     providers: [AppService],

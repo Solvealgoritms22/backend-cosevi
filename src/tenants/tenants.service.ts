@@ -35,6 +35,12 @@ export class TenantsService implements OnModuleInit, OnModuleDestroy {
         });
     }
 
+    async getTenantByApiKey(apiKey: string) {
+        return (this.masterClient.tenant as any).findUnique({
+            where: { apiKey },
+        });
+    }
+
     async getAllTenants() {
         return this.masterClient.tenant.findMany({
             where: { isActive: true },

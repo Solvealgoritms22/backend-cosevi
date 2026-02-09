@@ -201,3 +201,23 @@ model IncidentComment {
   author           User           @relation(fields: [authorId], references: [id])
   incidentReport   IncidentReport @relation(fields: [incidentReportId], references: [id])
 }
+
+model HardwareDevice {
+  id          String          @id @default(uuid())
+  name        String
+  type        String          // e.g., "LPR_CAMERA", "GATE_SENSOR"
+  location    String?
+  status      String          @default("ONLINE")
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  events      HardwareEvent[]
+}
+
+model HardwareEvent {
+  id          String         @id @default(uuid())
+  deviceId    String
+  type        String         // e.g., "PLATE_READ", "MOTION_DETECTED", "GATE_OPENED"
+  data        Json?          // e.g., { "plate": "ABC1234", "confidence": 0.98 }
+  timestamp   DateTime       @default(now())
+  device      HardwareDevice @relation(fields: [deviceId], references: [id])
+}
