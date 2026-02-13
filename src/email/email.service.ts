@@ -7,6 +7,12 @@ export class EmailService {
     private transporter: nodemailer.Transporter;
 
     constructor() {
+        console.log('Email Service Config:', {
+            host: process.env.EMAIL_HOST,
+            port: process.env.EMAIL_PORT,
+            user: process.env.EMAIL_USER,
+            hasPass: !!process.env.EMAIL_PASS
+        });
         this.transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -34,11 +40,13 @@ export class EmailService {
             hour: '2-digit', minute: '2-digit',
         });
 
-        await this.transporter.sendMail({
-            from: `"ENTRA" <${process.env.EMAIL_USER}>`,
-            to,
-            subject: '🔐 Completa tu suscripción - ENTRA',
-            html: `
+        console.log(`Attempting to send payment link to ${to}...`);
+        try {
+            const info = await this.transporter.sendMail({
+                from: `"ENTRA" <${process.env.EMAIL_USER}>`,
+                to,
+                subject: '🔐 Completa tu suscripción - ENTRA',
+                html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 32px; text-align: center;">
                         <h1 style="color: white; margin: 0; font-size: 28px;">ENTRA</h1>
@@ -80,15 +88,22 @@ export class EmailService {
                     </div>
                 </div>
             `,
-        });
+            });
+            console.log(`Payment link sent to ${to}: ${info.messageId}`);
+        } catch (error) {
+            console.error(`Error sending payment link to ${to}:`, error);
+            throw error;
+        }
     }
 
     async sendWelcome(to: string, name: string, plan: string) {
-        await this.transporter.sendMail({
-            from: `"ENTRA" <${process.env.EMAIL_USER}>`,
-            to,
-            subject: '🎉 ¡Bienvenido a ENTRA!',
-            html: `
+        console.log(`Attempting to send welcome email to ${to}...`);
+        try {
+            const info = await this.transporter.sendMail({
+                from: `"ENTRA" <${process.env.EMAIL_USER}>`,
+                to,
+                subject: '🎉 ¡Bienvenido a ENTRA!',
+                html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 32px; text-align: center;">
                         <h1 style="color: white; margin: 0; font-size: 28px;">🎉 ¡Bienvenido!</h1>
@@ -112,7 +127,12 @@ export class EmailService {
                     </div>
                 </div>
             `,
-        });
+            });
+            console.log(`Welcome email sent to ${to}: ${info.messageId}`);
+        } catch (error) {
+            console.error(`Error sending welcome email to ${to}:`, error);
+            throw error;
+        }
     }
 
     async sendInvoice(to: string, name: string, invoice: {
@@ -148,11 +168,13 @@ export class EmailService {
             }
         }
 
-        await this.transporter.sendMail({
-            from: `"ENTRA" <${process.env.EMAIL_USER}>`,
-            to,
-            subject: `📄 Factura ENTRA - ${invoice.billingPeriod}`,
-            html: `
+        console.log(`Attempting to send invoice to ${to}...`);
+        try {
+            const info = await this.transporter.sendMail({
+                from: `"ENTRA" <${process.env.EMAIL_USER}>`,
+                to,
+                subject: `📄 Factura ENTRA - ${invoice.billingPeriod}`,
+                html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 32px; text-align: center;">
                         <h1 style="color: white; margin: 0; font-size: 24px;">📄 Factura Mensual</h1>
@@ -181,6 +203,11 @@ export class EmailService {
                     </div>
                 </div>
             `,
-        });
+            });
+            console.log(`Invoice sent to ${to}: ${info.messageId}`);
+        } catch (error) {
+            console.error(`Error sending invoice to ${to}:`, error);
+            throw error;
+        }
     }
 }
