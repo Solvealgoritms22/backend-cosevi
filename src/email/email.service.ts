@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import * as dns from 'dns';
 
 @Injectable()
 export class EmailService {
@@ -14,10 +15,17 @@ export class EmailService {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS,
             },
-            connectionTimeout: 10000, // 10 seconds
-            greetingTimeout: 5000,    // 5 seconds
-            socketTimeout: 10000,     // 10 seconds
-            family: 4,                // force IPv4
+            connectionTimeout: 10000,
+            greetingTimeout: 5000,
+            socketTimeout: 10000,
+            // Force IPv4 lookup
+            family: 4,
+            localAddress: '0.0.0.0', // Force binding to IPv4 interface
+            dns: {
+                lookup: (hostname, options, callback) => {
+                    dns.lookup(hostname, { family: 4 }, callback);
+                }
+            }
         } as nodemailer.TransportOptions);
     }
 
@@ -28,13 +36,13 @@ export class EmailService {
         });
 
         await this.transporter.sendMail({
-            from: `"COSEVI" <${process.env.EMAIL_USER}>`,
+            from: `"ENTRA" <${process.env.EMAIL_USER}>`,
             to,
-            subject: '🔐 Completa tu suscripción - COSEVI',
+            subject: '🔐 Completa tu suscripción - ENTRA',
             html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 32px; text-align: center;">
-                        <h1 style="color: white; margin: 0; font-size: 28px;">COSEVI</h1>
+                        <h1 style="color: white; margin: 0; font-size: 28px;">ENTRA</h1>
                         <p style="color: #e0e7ff; margin: 8px 0 0;">Sistema de Gestión Residencial</p>
                     </div>
                     <div style="padding: 32px;">
@@ -69,7 +77,7 @@ export class EmailService {
                         </p>
                     </div>
                     <div style="background: #1e293b; padding: 20px; text-align: center;">
-                        <p style="color: #94a3b8; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} COSEVI. Todos los derechos reservados.</p>
+                        <p style="color: #94a3b8; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} ENTRA. Todos los derechos reservados.</p>
                     </div>
                 </div>
             `,
@@ -78,9 +86,9 @@ export class EmailService {
 
     async sendWelcome(to: string, name: string, plan: string) {
         await this.transporter.sendMail({
-            from: `"COSEVI" <${process.env.EMAIL_USER}>`,
+            from: `"ENTRA" <${process.env.EMAIL_USER}>`,
             to,
-            subject: '🎉 ¡Bienvenido a COSEVI!',
+            subject: '🎉 ¡Bienvenido a ENTRA!',
             html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 32px; text-align: center;">
@@ -101,7 +109,7 @@ export class EmailService {
                         </div>
                     </div>
                     <div style="background: #1e293b; padding: 20px; text-align: center;">
-                        <p style="color: #94a3b8; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} COSEVI. Todos los derechos reservados.</p>
+                        <p style="color: #94a3b8; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} ENTRA. Todos los derechos reservados.</p>
                     </div>
                 </div>
             `,
@@ -142,9 +150,9 @@ export class EmailService {
         }
 
         await this.transporter.sendMail({
-            from: `"COSEVI" <${process.env.EMAIL_USER}>`,
+            from: `"ENTRA" <${process.env.EMAIL_USER}>`,
             to,
-            subject: `📄 Factura COSEVI - ${invoice.billingPeriod}`,
+            subject: `📄 Factura ENTRA - ${invoice.billingPeriod}`,
             html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 32px; text-align: center;">
@@ -170,7 +178,7 @@ export class EmailService {
                         </table>
                     </div>
                     <div style="background: #1e293b; padding: 20px; text-align: center;">
-                        <p style="color: #94a3b8; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} COSEVI. Todos los derechos reservados.</p>
+                        <p style="color: #94a3b8; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} ENTRA. Todos los derechos reservados.</p>
                     </div>
                 </div>
             `,
