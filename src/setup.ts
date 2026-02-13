@@ -1,0 +1,58 @@
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { json, urlencoded } from 'express';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+
+export function setupApp(app: INestApplication) {
+    // Security Hardening
+    app.use(helmet({
+        crossOriginEmbedderPolicy: false,
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }));
+
+    // Enable trust proxy for rate limiting behind load balancers/proxies (like Render/Vercel)
+    app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
+    app.use(rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 1000, // Limit each IP to 1000 requests per windowMs
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: 'Too many requests from this IP, please try again after 15 minutes',
+    }));
+
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ limit: '50mb', extended: true }));
+
+    app.useGlobalPipes(new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+    }));
+
+    const allowedOrigins = [
+        'https://frontend-cosevi.vercel.app',
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:4200', // Common local dev port
+    ];
+
+    app.enableCors({
+        origin: (origin, callback) => {
+            const allowed = !origin ||
+                allowedOrigins.includes(origin) ||
+                origin.endsWith('.vercel.app') ||
+                /^http:\/\/localhost:\d+$/.test(origin);
+
+            if (allowed) {
+                callback(null, true);
+            } else {
+                console.warn(`Blocked CORS request from origin: ${origin}`);
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'x-tenant-id'],
+    });
+}
