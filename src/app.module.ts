@@ -30,6 +30,11 @@ import { Request, Response, NextFunction } from 'express';
             rootPath: join(process.cwd(), 'uploads'),
             serveRoot: '/uploads',
         }),
+        ServeStaticModule.forRoot({
+            rootPath: join(process.cwd(), 'public'),
+            serveRoot: '/',
+            exclude: ['/api/(.*)'],
+        }),
         PrismaModule,
         AuthModule,
         UsersModule,
