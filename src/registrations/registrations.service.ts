@@ -109,15 +109,18 @@ export class RegistrationsService {
             // Send payment email
             if (approvalLink) {
                 this.logger.log(`Sending payment email to ${data.email}`);
-                await this.emailService.sendPaymentLink(
+                // Non-blocking email send to prevent registration timeout
+                this.emailService.sendPaymentLink(
                     data.email,
                     data.name,
                     approvalLink,
                     plan,
                     amount,
                     expiresAt,
-                );
-                this.logger.log(`Payment email sent to ${data.email}`);
+                ).catch(err => {
+                    this.logger.error(`Failed to send payment email to ${data.email}: ${err.message}`, err.stack);
+                });
+                this.logger.log(`Payment email queued for ${data.email}`);
             } else {
                 this.logger.warn(`No approval link found in PayPal order for ${pending.id}`);
             }
