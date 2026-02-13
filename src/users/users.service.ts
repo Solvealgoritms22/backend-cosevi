@@ -1,4 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -14,6 +16,7 @@ export class UsersService {
         private prisma: PrismaService,
         private gateway: AppGateway,
         private quotasService: QuotasService,
+        @Inject(REQUEST) private request: Request,
     ) { }
 
     async create(createUserDto: CreateUserDto) {
@@ -85,7 +88,8 @@ export class UsersService {
                 }
             }
 
-            this.gateway.emitStatusUpdate({ type: 'USER_CREATED', user });
+            const tenantId = this.request.headers['x-tenant-id'] as string;
+            this.gateway.emitStatusUpdate({ type: 'USER_CREATED', user }, tenantId);
             return user;
         });
     }
@@ -261,7 +265,8 @@ export class UsersService {
                 }
             }
 
-            this.gateway.emitStatusUpdate({ type: 'USER_UPDATED', user });
+            const tenantId = this.request.headers['x-tenant-id'] as string;
+            this.gateway.emitStatusUpdate({ type: 'USER_UPDATED', user }, tenantId);
             return user;
         });
     }
@@ -310,8 +315,9 @@ export class UsersService {
             }
 
             const deleted = await tx.user.delete({ where: { id } });
+            const tenantId = this.request.headers['x-tenant-id'] as string;
             // Emit outside transaction to avoid blocking, but inside async scope
-            this.gateway.emitStatusUpdate({ type: 'USER_DELETED', userId: id });
+            this.gateway.emitStatusUpdate({ type: 'USER_DELETED', userId: id }, tenantId);
             return deleted;
         });
     }

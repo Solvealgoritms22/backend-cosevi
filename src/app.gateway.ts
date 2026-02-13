@@ -1,33 +1,44 @@
-import {
-    OnGatewayConnection,
-    OnGatewayDisconnect,
-    WebSocketGateway,
-    WebSocketServer,
-} from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Injectable, Logger } from '@nestjs/common';
+import { PusherService } from './pusher.service';
 
-@WebSocketGateway({
-    cors: {
-        origin: ['https://frontend-cosevi.vercel.app', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:4200'],
-        credentials: true,
-    },
-})
-export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
-    @WebSocketServer() server: Server;
+@Injectable()
+export class AppGateway {
+    private readonly logger = new Logger(AppGateway.name);
 
-    handleConnection(client: Socket) {
-        console.log(`Client connected: ${client.id}`);
+    constructor(private pusherService: PusherService) { }
+
+    private getTenantChannel(tenantId: string, resource: string): string {
+        return `private-tenant-${tenantId}-${resource}`;
     }
 
-    handleDisconnect(client: Socket) {
-        console.log(`Client disconnected: ${client.id}`);
+    emitVisitUpdate(data: any, tenantId?: string) {
+        const tid = tenantId || data.tenantId || 'global';
+        const channel = this.getTenantChannel(tid, 'visits');
+        this.pusherService.trigger(channel, 'visitUpdate', data);
     }
 
-    emitVisitUpdate(data: any) {
-        this.server.emit('visitUpdate', data);
+    emitStatusUpdate(data: any, tenantId?: string) {
+        const tid = tenantId || data.tenantId || 'global';
+        const channel = this.getTenantChannel(tid, 'status');
+        this.pusherService.trigger(channel, 'statusUpdate', data);
     }
 
-    emitStatusUpdate(data: any) {
-        this.server.emit('statusUpdate', data);
+    emitIncidentCreated(data: any, tenantId?: string) {
+        const tid = tenantId || 'global';
+        const channel = this.getTenantChannel(tid, 'visits');
+        this.pusherService.trigger(channel, 'incidentCreated', data);
+    }
+
+    emitCommentAdded(data: any, tenantId?: string) {
+        const tid = tenantId || 'global';
+        const channel = this.getTenantChannel(tid, 'visits');
+        this.pusherService.trigger(channel, 'commentAdded', data);
+    }
+
+    emitIncidentStatusUpdated(data: any, tenantId?: string) {
+        const tid = tenantId || 'global';
+        const channel = this.getTenantChannel(tid, 'visits');
+        this.pusherService.trigger(channel, 'incidentStatusUpdated', data);
     }
 }
+

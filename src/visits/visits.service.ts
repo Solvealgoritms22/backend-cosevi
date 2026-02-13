@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 import { AppGateway } from '../app.gateway';
 import { PrismaService } from '../prisma.service';
 import { CreateVisitDto } from './dto/create-visit.dto';
@@ -9,6 +11,7 @@ export class VisitsService {
     constructor(
         private prisma: PrismaService,
         private gateway: AppGateway,
+        @Inject(REQUEST) private request: Request,
     ) { }
 
     async create(createVisitDto: CreateVisitDto) {
@@ -90,7 +93,8 @@ export class VisitsService {
             },
         });
 
-        this.gateway.emitVisitUpdate(newVisit);
+        const tenantId = this.request.headers['x-tenant-id'] as string;
+        this.gateway.emitVisitUpdate(newVisit, tenantId);
         return newVisit;
     }
 

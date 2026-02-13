@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 import { AppGateway } from '../app.gateway';
 import { PrismaService } from '../prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -8,7 +10,8 @@ import { CreateReportDto } from './dto/create-report.dto';
 export class ReportsService {
     constructor(
         private prisma: PrismaService,
-        private gateway: AppGateway
+        private gateway: AppGateway,
+        @Inject(REQUEST) private request: Request,
     ) { }
 
     async create(userId: string, createReportDto: CreateReportDto) {
@@ -27,7 +30,8 @@ export class ReportsService {
                 },
             },
         });
-        this.gateway.server.emit('incidentCreated', report);
+        const tenantId = this.request.headers['x-tenant-id'] as string;
+        this.gateway.emitIncidentCreated(report, tenantId);
         return report;
     }
 
@@ -101,7 +105,8 @@ export class ReportsService {
                 },
             },
         });
-        this.gateway.server.emit('commentAdded', { incidentReportId, comment });
+        const tenantId = this.request.headers['x-tenant-id'] as string;
+        this.gateway.emitCommentAdded({ incidentReportId, comment }, tenantId);
         return comment;
     }
 
@@ -110,7 +115,8 @@ export class ReportsService {
             where: { id },
             data: { status },
         });
-        this.gateway.server.emit('incidentStatusUpdated', report);
+        const tenantId = this.request.headers['x-tenant-id'] as string;
+        this.gateway.emitIncidentStatusUpdated(report, tenantId);
         return report;
     }
 }
