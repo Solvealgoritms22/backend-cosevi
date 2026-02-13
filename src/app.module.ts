@@ -22,7 +22,6 @@ import { RegistrationsModule } from './registrations/registrations.module';
 import { BillingModule } from './billing/billing.module';
 import { PusherService } from './pusher.service';
 import { PusherController } from './pusher.controller';
-import { AppGateway } from './app.gateway';
 import { Request, Response, NextFunction } from 'express';
 
 @Module({
@@ -50,7 +49,7 @@ import { Request, Response, NextFunction } from 'express';
         BillingModule,
     ],
     controllers: [AppController, PusherController],
-    providers: [AppService, PusherService, AppGateway],
+    providers: [AppService],
 })
 export class AppModule {
     configure(consumer: MiddlewareConsumer) {
