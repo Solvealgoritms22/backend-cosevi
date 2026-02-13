@@ -67,7 +67,7 @@ export class PayPalService {
                     purchase_units: [
                         {
                             reference_id: pendingRegistrationId,
-                            description: `COSEVI - Plan ${plan.charAt(0).toUpperCase() + plan.slice(1)} (Mensual)`,
+                            description: `ENTRAR - Plan ${plan.charAt(0).toUpperCase() + plan.slice(1)} (Mensual)`,
                             amount: {
                                 currency_code: 'USD',
                                 value: amount.toFixed(2),
@@ -75,7 +75,7 @@ export class PayPalService {
                         },
                     ],
                     application_context: {
-                        brand_name: 'COSEVI',
+                        brand_name: 'ENTRAR',
                         landing_page: 'NO_PREFERENCE',
                         user_action: 'PAY_NOW',
                         return_url: `${frontendUrl}/payment-success?registration=${pendingRegistrationId}`,

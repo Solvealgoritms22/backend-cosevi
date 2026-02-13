@@ -9,7 +9,7 @@ export class AppService {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>COSEVI Backend API</title>
+        <title>ENTRAR Backend API</title>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
         <style>
             :root {
@@ -173,8 +173,8 @@ export class AppService {
                 <span class="dot"></span>
                 API Running Smoothly
             </div>
-            <h1>COSEVI Backend</h1>
-            <p>Welcome to the core service layer of the COSEVI platform. Secure, multi-tenant infrastructure powering safety and logistics.</p>
+            <h1>ENTRAR Backend</h1>
+            <p>Welcome to the core service layer of the ENTRAR platform. Secure, multi-tenant infrastructure powering safety and logistics.</p>
             
             <div class="links">
                 <a href="/api" class="btn btn-primary">API Endpoint</a>
@@ -182,7 +182,7 @@ export class AppService {
             </div>
 
             <div class="footer">
-                &copy; 2026 COSEVI Infrastructure
+                &copy; 2026 ENTRAR Infrastructure
             </div>
         </div>
     </body>
