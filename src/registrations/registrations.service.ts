@@ -37,12 +37,13 @@ export class RegistrationsService {
         plan: string;
         logoUrl?: string;
     }) {
-        this.logger.log(`Starting registration for ${data.email}`);
+        this.logger.log(`Starting registration for ${data.email}. Payload: ${JSON.stringify({ ...data, password: '***' })}`);
 
         // Validate plan
         const plan = data.plan || 'starter';
         const amount = PLAN_PRICES[plan];
         if (!amount) {
+            this.logger.error(`Invalid plan requested: ${plan}`);
             throw new BadRequestException(`Plan inválido: ${plan}`);
         }
 
@@ -132,13 +133,15 @@ export class RegistrationsService {
                 expiresAt,
             };
         } catch (error) {
-            this.logger.error(`Registration failed at PayPal/Email step: ${error.message}`, error.stack);
-            // If PayPal fails, mark registration as cancelled
-            await this.masterClient.pendingRegistration.update({
-                where: { id: pending.id },
-                data: { status: 'CANCELLED' },
-            });
-            throw new BadRequestException('Error al crear la orden de pago. Intenta nuevamente.');
+            this.logger.error(`Registration failed: ${error.message}`, error.stack);
+            if (pending) {
+                // If PayPal fails, mark registration as cancelled
+                await this.masterClient.pendingRegistration.update({
+                    where: { id: pending.id },
+                    data: { status: 'CANCELLED' },
+                }).catch(e => this.logger.error(`Failed to cancel registration ${pending.id}: ${e.message}`));
+            }
+            throw new BadRequestException(error.message || 'Error al procesar el registro. Intenta nuevamente.');
         }
     }
 
