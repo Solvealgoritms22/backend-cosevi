@@ -158,6 +158,7 @@ export class UsersService {
                 profileImage: true,
                 pushNotificationsEnabled: true,
                 pushToken: true,
+                qrSecret: true,
             },
         });
     }
