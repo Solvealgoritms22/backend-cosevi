@@ -6,11 +6,15 @@ import sharp from 'sharp';
 @Injectable()
 export class UploadsService {
     private readonly uploadDir = 'uploads/profile-images';
+    private readonly logoDir = 'uploads/logos';
 
     constructor() {
-        // Ensure upload directory exists
+        // Ensure upload directories exist
         if (!fs.existsSync(this.uploadDir)) {
             fs.mkdirSync(this.uploadDir, { recursive: true });
+        }
+        if (!fs.existsSync(this.logoDir)) {
+            fs.mkdirSync(this.logoDir, { recursive: true });
         }
     }
 
@@ -42,6 +46,35 @@ export class UploadsService {
         } catch (error) {
             console.error('Image processing error:', error);
             throw new BadRequestException('Failed to process image');
+        }
+    }
+
+    async processAndSaveLogo(file: Express.Multer.File): Promise<string> {
+        if (!file) {
+            throw new BadRequestException('No file provided');
+        }
+
+        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp|svg\+xml)$/)) {
+            throw new BadRequestException('Only image files are allowed!');
+        }
+
+        const { v4: uuidv4 } = await import('uuid');
+        const filename = `${uuidv4()}.png`;
+        const filepath = path.join(this.logoDir, filename);
+
+        try {
+            await sharp(file.buffer)
+                .resize(400, 200, {
+                    fit: 'inside',
+                    withoutEnlargement: true,
+                })
+                .png({ quality: 95 })
+                .toFile(filepath);
+
+            return `/uploads/logos/${filename}`;
+        } catch (error) {
+            console.error('Logo processing error:', error);
+            throw new BadRequestException('Failed to process logo image');
         }
     }
 }

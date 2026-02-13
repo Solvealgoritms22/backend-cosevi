@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaService } from '../prisma.service';
@@ -7,6 +7,8 @@ import { PLAN_LIMITS } from '../auth/guards/plan.guard';
 
 @Injectable()
 export class QuotasService {
+    private readonly logger = new Logger(QuotasService.name);
+
     constructor(
         private prisma: PrismaService,
         private tenantsService: TenantsService,
@@ -45,9 +47,12 @@ export class QuotasService {
         }
 
         if (currentCount >= limit) {
-            throw new ForbiddenException(
-                `Alcanzó el límite de su plan (${limit}) para el recurso: ${resource}. Actualice a un plan superior.`
+            // Soft overage: allow operation but log the excess
+            this.logger.warn(
+                `[OVERAGE] Tenant plan "${plan}" exceeded limit for ${resource}: ${currentCount}/${limit}. ` +
+                `Overage will be billed on next invoice.`
             );
+            // Operation continues — overage is calculated at billing time by BillingService
         }
     }
 }

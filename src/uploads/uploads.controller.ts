@@ -18,4 +18,16 @@ export class UploadsController {
         const url = await this.uploadsService.processAndSaveProfileImage(file);
         return { url };
     }
+
+    @Post('logo')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: memoryStorage(),
+        limits: {
+            fileSize: 5 * 1024 * 1024, // 5MB
+        },
+    }))
+    async uploadLogo(@UploadedFile() file: Express.Multer.File) {
+        const url = await this.uploadsService.processAndSaveLogo(file);
+        return { url };
+    }
 }

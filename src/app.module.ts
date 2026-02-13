@@ -16,6 +16,10 @@ import { UploadsModule } from './uploads/uploads.module';
 import { SocketModule } from './socket.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { HardwareModule } from './hardware/hardware.module';
+import { EmailModule } from './email/email.module';
+import { PayPalModule } from './paypal/paypal.module';
+import { RegistrationsModule } from './registrations/registrations.module';
+import { BillingModule } from './billing/billing.module';
 import { Request, Response, NextFunction } from 'express';
 
 @Module({
@@ -37,6 +41,10 @@ import { Request, Response, NextFunction } from 'express';
         UploadsModule,
         TenantsModule,
         HardwareModule,
+        EmailModule,
+        PayPalModule,
+        RegistrationsModule,
+        BillingModule,
     ],
     controllers: [AppController],
     providers: [AppService],

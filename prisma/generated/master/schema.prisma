@@ -10,17 +10,122 @@ datasource db {
 }
 
 model Tenant {
-  id             String   @id @default(uuid())
+  id             String          @id @default(uuid())
   name           String
-  subdomain      String   @unique
+  subdomain      String          @unique
   dbUrl          String
-  plan           String   @default("starter")
-  apiKey         String?  @unique @default(cuid())
+  plan           String          @default("starter")
+  apiKey         String?         @unique @default(cuid())
   logoUrl        String?
-  primaryColor   String?  @default("#4f46e5")
-  secondaryColor String?  @default("#1e293b")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  isActive       Boolean  @default(true)
+  primaryColor   String?         @default("#4f46e5")
+  secondaryColor String?         @default("#1e293b")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  isActive       Boolean         @default(true)
   location       String?
+  subscriptions  Subscription[]
+  invoices       Invoice[]
+  usageSnapshots UsageSnapshot[]
+}
+
+model PendingRegistration {
+  id               String             @id @default(uuid())
+  name             String
+  email            String
+  passwordHash     String
+  organizationName String
+  location         String?
+  plan             String             @default("starter")
+  logoUrl          String?
+  paypalOrderId    String?            @unique
+  paymentLink      String?
+  amount           Float              @default(0)
+  status           RegistrationStatus @default(PENDING)
+  expiresAt        DateTime
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([status])
+  @@index([paypalOrderId])
+  @@index([email])
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  tenantId             String
+  plan                 String
+  paypalSubscriptionId String?            @unique
+  status               SubscriptionStatus @default(ACTIVE)
+  amount               Float
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  tenant               Tenant             @relation(fields: [tenantId], references: [id])
+  invoices             Invoice[]
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+model Invoice {
+  id                 String         @id @default(uuid())
+  tenantId           String
+  subscriptionId     String?
+  amount             Float // Base plan amount
+  overageAmount      Float          @default(0)
+  totalAmount        Float // amount + overageAmount
+  status             InvoiceStatus  @default(PENDING)
+  paypalPaymentId    String?
+  billingPeriodStart DateTime
+  billingPeriodEnd   DateTime
+  details            Json? // Breakdown: { units: { used, limit, extra, cost }, ... }
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  tenant             Tenant         @relation(fields: [tenantId], references: [id])
+  subscription       Subscription?  @relation(fields: [subscriptionId], references: [id])
+  usageSnapshot      UsageSnapshot?
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([billingPeriodStart, billingPeriodEnd])
+}
+
+model UsageSnapshot {
+  id           String   @id @default(uuid())
+  tenantId     String
+  invoiceId    String   @unique
+  units        Int      @default(0)
+  parking      Int      @default(0)
+  monitors     Int      @default(0)
+  security     Int      @default(0)
+  visits       Int      @default(0)
+  incidents    Int      @default(0)
+  emergencies  Int      @default(0)
+  snapshotDate DateTime @default(now())
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  invoice      Invoice  @relation(fields: [invoiceId], references: [id])
+
+  @@index([tenantId])
+}
+
+enum RegistrationStatus {
+  PENDING
+  PAID
+  EXPIRED
+  CANCELLED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  PAUSED
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
 }

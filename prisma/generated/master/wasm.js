@@ -109,9 +109,75 @@ exports.Prisma.TenantScalarFieldEnum = {
   location: 'location'
 };
 
+exports.Prisma.PendingRegistrationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  organizationName: 'organizationName',
+  location: 'location',
+  plan: 'plan',
+  logoUrl: 'logoUrl',
+  paypalOrderId: 'paypalOrderId',
+  paymentLink: 'paymentLink',
+  amount: 'amount',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  plan: 'plan',
+  paypalSubscriptionId: 'paypalSubscriptionId',
+  status: 'status',
+  amount: 'amount',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InvoiceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  subscriptionId: 'subscriptionId',
+  amount: 'amount',
+  overageAmount: 'overageAmount',
+  totalAmount: 'totalAmount',
+  status: 'status',
+  paypalPaymentId: 'paypalPaymentId',
+  billingPeriodStart: 'billingPeriodStart',
+  billingPeriodEnd: 'billingPeriodEnd',
+  details: 'details',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.UsageSnapshotScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  invoiceId: 'invoiceId',
+  units: 'units',
+  parking: 'parking',
+  monitors: 'monitors',
+  security: 'security',
+  visits: 'visits',
+  incidents: 'incidents',
+  emergencies: 'emergencies',
+  snapshotDate: 'snapshotDate'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -124,9 +190,38 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+exports.RegistrationStatus = exports.$Enums.RegistrationStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
+};
+
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  ACTIVE: 'ACTIVE',
+  PAST_DUE: 'PAST_DUE',
+  CANCELLED: 'CANCELLED',
+  PAUSED: 'PAUSED'
+};
+
+exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+};
 
 exports.Prisma.ModelName = {
-  Tenant: 'Tenant'
+  Tenant: 'Tenant',
+  PendingRegistration: 'PendingRegistration',
+  Subscription: 'Subscription',
+  Invoice: 'Invoice',
+  UsageSnapshot: 'UsageSnapshot'
 };
 /**
  * Create the Client
@@ -179,13 +274,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/master\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"MASTER_DATABASE_URL\")\n}\n\nmodel Tenant {\n  id             String   @id @default(uuid())\n  name           String\n  subdomain      String   @unique\n  dbUrl          String\n  plan           String   @default(\"starter\")\n  apiKey         String?  @unique @default(cuid())\n  logoUrl        String?\n  primaryColor   String?  @default(\"#4f46e5\")\n  secondaryColor String?  @default(\"#1e293b\")\n  createdAt      DateTime @default(now())\n  updatedAt      DateTime @updatedAt\n  isActive       Boolean  @default(true)\n  location       String?\n}\n",
-  "inlineSchemaHash": "a2ec7cf24a7bfdfc912d8356ec6df71a28038620469937ece934039e0ff62574",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/master\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"MASTER_DATABASE_URL\")\n}\n\nmodel Tenant {\n  id             String          @id @default(uuid())\n  name           String\n  subdomain      String          @unique\n  dbUrl          String\n  plan           String          @default(\"starter\")\n  apiKey         String?         @unique @default(cuid())\n  logoUrl        String?\n  primaryColor   String?         @default(\"#4f46e5\")\n  secondaryColor String?         @default(\"#1e293b\")\n  createdAt      DateTime        @default(now())\n  updatedAt      DateTime        @updatedAt\n  isActive       Boolean         @default(true)\n  location       String?\n  subscriptions  Subscription[]\n  invoices       Invoice[]\n  usageSnapshots UsageSnapshot[]\n}\n\nmodel PendingRegistration {\n  id               String             @id @default(uuid())\n  name             String\n  email            String\n  passwordHash     String\n  organizationName String\n  location         String?\n  plan             String             @default(\"starter\")\n  logoUrl          String?\n  paypalOrderId    String?            @unique\n  paymentLink      String?\n  amount           Float              @default(0)\n  status           RegistrationStatus @default(PENDING)\n  expiresAt        DateTime\n  createdAt        DateTime           @default(now())\n  updatedAt        DateTime           @updatedAt\n\n  @@index([status])\n  @@index([paypalOrderId])\n  @@index([email])\n}\n\nmodel Subscription {\n  id                   String             @id @default(uuid())\n  tenantId             String\n  plan                 String\n  paypalSubscriptionId String?            @unique\n  status               SubscriptionStatus @default(ACTIVE)\n  amount               Float\n  currentPeriodStart   DateTime\n  currentPeriodEnd     DateTime\n  createdAt            DateTime           @default(now())\n  updatedAt            DateTime           @updatedAt\n  tenant               Tenant             @relation(fields: [tenantId], references: [id])\n  invoices             Invoice[]\n\n  @@index([tenantId])\n  @@index([status])\n}\n\nmodel Invoice {\n  id                 String         @id @default(uuid())\n  tenantId           String\n  subscriptionId     String?\n  amount             Float // Base plan amount\n  overageAmount      Float          @default(0)\n  totalAmount        Float // amount + overageAmount\n  status             InvoiceStatus  @default(PENDING)\n  paypalPaymentId    String?\n  billingPeriodStart DateTime\n  billingPeriodEnd   DateTime\n  details            Json? // Breakdown: { units: { used, limit, extra, cost }, ... }\n  createdAt          DateTime       @default(now())\n  updatedAt          DateTime       @updatedAt\n  tenant             Tenant         @relation(fields: [tenantId], references: [id])\n  subscription       Subscription?  @relation(fields: [subscriptionId], references: [id])\n  usageSnapshot      UsageSnapshot?\n\n  @@index([tenantId])\n  @@index([status])\n  @@index([billingPeriodStart, billingPeriodEnd])\n}\n\nmodel UsageSnapshot {\n  id           String   @id @default(uuid())\n  tenantId     String\n  invoiceId    String   @unique\n  units        Int      @default(0)\n  parking      Int      @default(0)\n  monitors     Int      @default(0)\n  security     Int      @default(0)\n  visits       Int      @default(0)\n  incidents    Int      @default(0)\n  emergencies  Int      @default(0)\n  snapshotDate DateTime @default(now())\n  tenant       Tenant   @relation(fields: [tenantId], references: [id])\n  invoice      Invoice  @relation(fields: [invoiceId], references: [id])\n\n  @@index([tenantId])\n}\n\nenum RegistrationStatus {\n  PENDING\n  PAID\n  EXPIRED\n  CANCELLED\n}\n\nenum SubscriptionStatus {\n  ACTIVE\n  PAST_DUE\n  CANCELLED\n  PAUSED\n}\n\nenum InvoiceStatus {\n  PENDING\n  PAID\n  FAILED\n  REFUNDED\n}\n",
+  "inlineSchemaHash": "f2aa61a233437af7edbd92881fc2e48cb2d7fb15652a19d9ad5ff60928ae48b3",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Tenant\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subdomain\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dbUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"plan\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"apiKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"logoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"primaryColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"secondaryColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"location\",\"kind\":\"scalar\",\"type\":\"String\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Tenant\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subdomain\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dbUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"plan\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"apiKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"logoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"primaryColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"secondaryColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"location\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subscriptions\",\"kind\":\"object\",\"type\":\"Subscription\",\"relationName\":\"SubscriptionToTenant\"},{\"name\":\"invoices\",\"kind\":\"object\",\"type\":\"Invoice\",\"relationName\":\"InvoiceToTenant\"},{\"name\":\"usageSnapshots\",\"kind\":\"object\",\"type\":\"UsageSnapshot\",\"relationName\":\"TenantToUsageSnapshot\"}],\"dbName\":null},\"PendingRegistration\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"passwordHash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"organizationName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"location\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"plan\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"logoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"paypalOrderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"paymentLink\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"RegistrationStatus\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Subscription\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tenantId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"plan\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"paypalSubscriptionId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"SubscriptionStatus\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"currentPeriodStart\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"currentPeriodEnd\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"tenant\",\"kind\":\"object\",\"type\":\"Tenant\",\"relationName\":\"SubscriptionToTenant\"},{\"name\":\"invoices\",\"kind\":\"object\",\"type\":\"Invoice\",\"relationName\":\"InvoiceToSubscription\"}],\"dbName\":null},\"Invoice\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tenantId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subscriptionId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"overageAmount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"totalAmount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"InvoiceStatus\"},{\"name\":\"paypalPaymentId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"billingPeriodStart\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"billingPeriodEnd\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"details\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"tenant\",\"kind\":\"object\",\"type\":\"Tenant\",\"relationName\":\"InvoiceToTenant\"},{\"name\":\"subscription\",\"kind\":\"object\",\"type\":\"Subscription\",\"relationName\":\"InvoiceToSubscription\"},{\"name\":\"usageSnapshot\",\"kind\":\"object\",\"type\":\"UsageSnapshot\",\"relationName\":\"InvoiceToUsageSnapshot\"}],\"dbName\":null},\"UsageSnapshot\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tenantId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"invoiceId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"units\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"parking\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"monitors\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"security\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"visits\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"incidents\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"emergencies\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"snapshotDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"tenant\",\"kind\":\"object\",\"type\":\"Tenant\",\"relationName\":\"TenantToUsageSnapshot\"},{\"name\":\"invoice\",\"kind\":\"object\",\"type\":\"Invoice\",\"relationName\":\"InvoiceToUsageSnapshot\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

@@ -137,9 +137,75 @@ exports.Prisma.TenantScalarFieldEnum = {
   location: 'location'
 };
 
+exports.Prisma.PendingRegistrationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  organizationName: 'organizationName',
+  location: 'location',
+  plan: 'plan',
+  logoUrl: 'logoUrl',
+  paypalOrderId: 'paypalOrderId',
+  paymentLink: 'paymentLink',
+  amount: 'amount',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  plan: 'plan',
+  paypalSubscriptionId: 'paypalSubscriptionId',
+  status: 'status',
+  amount: 'amount',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InvoiceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  subscriptionId: 'subscriptionId',
+  amount: 'amount',
+  overageAmount: 'overageAmount',
+  totalAmount: 'totalAmount',
+  status: 'status',
+  paypalPaymentId: 'paypalPaymentId',
+  billingPeriodStart: 'billingPeriodStart',
+  billingPeriodEnd: 'billingPeriodEnd',
+  details: 'details',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.UsageSnapshotScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  invoiceId: 'invoiceId',
+  units: 'units',
+  parking: 'parking',
+  monitors: 'monitors',
+  security: 'security',
+  visits: 'visits',
+  incidents: 'incidents',
+  emergencies: 'emergencies',
+  snapshotDate: 'snapshotDate'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -152,9 +218,38 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+exports.RegistrationStatus = exports.$Enums.RegistrationStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
+};
+
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  ACTIVE: 'ACTIVE',
+  PAST_DUE: 'PAST_DUE',
+  CANCELLED: 'CANCELLED',
+  PAUSED: 'PAUSED'
+};
+
+exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+};
 
 exports.Prisma.ModelName = {
-  Tenant: 'Tenant'
+  Tenant: 'Tenant',
+  PendingRegistration: 'PendingRegistration',
+  Subscription: 'Subscription',
+  Invoice: 'Invoice',
+  UsageSnapshot: 'UsageSnapshot'
 };
 
 /**

@@ -48,7 +48,7 @@ export class TenantsService implements OnModuleInit, OnModuleDestroy {
     }
 
     // Helper to create a new tenant (for the signup flow)
-    async createTenant(data: { name: string; subdomain: string; dbUrl: string; plan: string; location?: string }) {
+    async createTenant(data: { name: string; subdomain: string; dbUrl: string; plan: string; location?: string; logoUrl?: string }) {
         return this.masterClient.tenant.create({
             data,
         });
