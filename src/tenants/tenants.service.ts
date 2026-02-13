@@ -6,10 +6,16 @@ export class TenantsService implements OnModuleInit, OnModuleDestroy {
     private masterClient: MasterClient;
 
     constructor() {
+        const masterUrl = process.env.MASTER_DATABASE_URL || process.env.DATABASE_URL;
+
+        if (!masterUrl) {
+            console.warn('⚠️ Warning: Neither MASTER_DATABASE_URL nor DATABASE_URL is defined. TenantsService will fail.');
+        }
+
         this.masterClient = new MasterClient({
             datasources: {
                 db: {
-                    url: process.env.MASTER_DATABASE_URL,
+                    url: masterUrl,
                 },
             },
         });
