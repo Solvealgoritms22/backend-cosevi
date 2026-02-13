@@ -209,9 +209,11 @@ model HardwareDevice {
   type        String          // e.g., "LPR_CAMERA", "GATE_SENSOR"
   location    String?
   status      String          @default("ONLINE")
+  lastSeen    DateTime?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   events      HardwareEvent[]
+  commands    IotCommand[]
 }
 
 model HardwareEvent {
@@ -221,4 +223,15 @@ model HardwareEvent {
   data        Json?          // e.g., { "plate": "ABC1234", "confidence": 0.98 }
   timestamp   DateTime       @default(now())
   device      HardwareDevice @relation(fields: [deviceId], references: [id])
+}
+
+model IotCommand {
+  id        String         @id @default(uuid())
+  deviceId  String
+  command   String         // "OPEN", "CLOSE"
+  payload   Json?
+  status    String         @default("PENDING") // PENDING, SENT, COMPLETED, FAILED
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  device    HardwareDevice @relation(fields: [deviceId], references: [id])
 }

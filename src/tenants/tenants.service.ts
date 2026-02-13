@@ -60,4 +60,12 @@ export class TenantsService implements OnModuleInit, OnModuleDestroy {
             data,
         });
     }
+
+    async generateApiKey(tenantId: string) {
+        const apiKey = `sk_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+        return this.masterClient.tenant.update({
+            where: { id: tenantId },
+            data: { apiKey },
+        });
+    }
 }

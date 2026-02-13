@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Body, NotFoundException, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Param, Body, NotFoundException, Req, UseGuards } from '@nestjs/common';
 import { TenantsService } from './tenants.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
@@ -22,6 +22,16 @@ export class TenantsController {
         };
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Get('me')
+    async getTenantDetails(@Req() req: Request) {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        if (!tenantId) {
+            throw new NotFoundException('Tenant not identified');
+        }
+        return this.tenantsService.getTenantById(tenantId);
+    }
+
     // Protected endpoint - update branding for the current tenant
     @UseGuards(JwtAuthGuard)
     @Patch('branding')
@@ -43,5 +53,16 @@ export class TenantsController {
             primaryColor: updated.primaryColor,
             secondaryColor: updated.secondaryColor,
         };
+    }
+    @UseGuards(JwtAuthGuard)
+    @Post('api-key')
+    async generateApiKey(@Req() req: Request) {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        if (!tenantId) {
+            throw new NotFoundException('Tenant not identified');
+        }
+
+        const tenant = await this.tenantsService.generateApiKey(tenantId);
+        return { apiKey: tenant.apiKey };
     }
 }

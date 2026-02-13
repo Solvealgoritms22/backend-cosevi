@@ -84,4 +84,5 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     get incidentComment() { return this.getModelProxy<PrismaClient['incidentComment']>('incidentComment'); }
     get hardwareDevice() { return this.getModelProxy<any>('hardwareDevice'); }
     get hardwareEvent() { return this.getModelProxy<any>('hardwareEvent'); }
+    get iotCommand() { return this.getModelProxy<any>('iotCommand'); }
 }

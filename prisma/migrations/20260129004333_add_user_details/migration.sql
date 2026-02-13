@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "User" ADD COLUMN "dateOfBirth" DATETIME;
-ALTER TABLE "User" ADD COLUMN "idNumber" TEXT;
-ALTER TABLE "User" ADD COLUMN "phone" TEXT;
