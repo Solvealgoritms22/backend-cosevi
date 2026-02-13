@@ -17,7 +17,8 @@ export class EmailService {
             connectionTimeout: 10000, // 10 seconds
             greetingTimeout: 5000,    // 5 seconds
             socketTimeout: 10000,     // 10 seconds
-        });
+            family: 4,                // force IPv4
+        } as nodemailer.TransportOptions);
     }
 
     async sendPaymentLink(to: string, name: string, paymentUrl: string, plan: string, amount: number, expiresAt: Date) {
