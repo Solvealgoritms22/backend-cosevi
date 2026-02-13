@@ -20,7 +20,6 @@ export class EmailService {
             socketTimeout: 10000,
             // Force IPv4 lookup
             family: 4,
-            localAddress: '0.0.0.0', // Force binding to IPv4 interface
             dns: {
                 lookup: (hostname, options, callback) => {
                     dns.lookup(hostname, { family: 4 }, callback);
