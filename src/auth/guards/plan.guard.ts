@@ -13,18 +13,27 @@ export const PLAN_LIMITS = {
         parking: 100,
         monitors: 2,
         security: 5,
+        visits: 200,
+        alerts: 50,
+        reports: 20,
     },
     [PLANS.PREMIUM]: {
         units: 200,
         parking: 400,
         monitors: 5,
         security: 15,
+        visits: 1000,
+        alerts: 200,
+        reports: 100,
     },
     [PLANS.ELITE]: {
         units: Infinity,
         parking: Infinity,
         monitors: Infinity,
         security: Infinity,
+        visits: Infinity,
+        alerts: Infinity,
+        reports: Infinity,
     },
 };
 

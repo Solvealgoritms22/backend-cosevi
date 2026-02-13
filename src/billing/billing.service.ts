@@ -17,6 +17,9 @@ const OVERAGE_RATES: Record<string, number> = {
     parking: 0.75,
     monitors: 10.00,
     security: 5.00,
+    visits: 0.25,
+    alerts: 0.50,
+    reports: 1.00,
 };
 
 @Injectable()
@@ -49,11 +52,17 @@ export class BillingService {
         const limits = PLAN_LIMITS[plan] || PLAN_LIMITS['starter'];
 
         // Get current counts
-        const [units, parking, monitors, security] = await Promise.all([
+        const now = new Date();
+        const periodStart = new Date(now.getFullYear(), now.getMonth(), 1); // First day of current month
+
+        const [units, parking, monitors, security, visits, alerts, reports] = await Promise.all([
             this.prisma.residentProfile.count(),
             this.prisma.space.count(),
             this.prisma.user.count({ where: { role: 'ADMIN' } }),
             this.prisma.user.count({ where: { role: 'SECURITY' } }),
+            this.prisma.visit.count({ where: { createdAt: { gte: periodStart } } }),
+            this.prisma.emergencyAlert.count({ where: { createdAt: { gte: periodStart } } }),
+            this.prisma.incidentReport.count({ where: { createdAt: { gte: periodStart } } }),
         ]);
 
         const resources = {
@@ -88,6 +97,30 @@ export class BillingService {
                 overageCost: Math.max(0, security - limits.security) * OVERAGE_RATES.security,
                 rate: OVERAGE_RATES.security,
                 percentage: limits.security === Infinity ? 0 : Math.round((security / limits.security) * 100),
+            },
+            visits: {
+                current: visits,
+                limit: limits.visits,
+                extra: limits.visits === Infinity ? 0 : Math.max(0, visits - limits.visits),
+                overageCost: limits.visits === Infinity ? 0 : Math.max(0, visits - limits.visits) * OVERAGE_RATES.visits,
+                rate: OVERAGE_RATES.visits,
+                percentage: limits.visits === Infinity ? 0 : Math.round((visits / limits.visits) * 100),
+            },
+            alerts: {
+                current: alerts,
+                limit: limits.alerts,
+                extra: limits.alerts === Infinity ? 0 : Math.max(0, alerts - limits.alerts),
+                overageCost: limits.alerts === Infinity ? 0 : Math.max(0, alerts - limits.alerts) * OVERAGE_RATES.alerts,
+                rate: OVERAGE_RATES.alerts,
+                percentage: limits.alerts === Infinity ? 0 : Math.round((alerts / limits.alerts) * 100),
+            },
+            reports: {
+                current: reports,
+                limit: limits.reports,
+                extra: limits.reports === Infinity ? 0 : Math.max(0, reports - limits.reports),
+                overageCost: limits.reports === Infinity ? 0 : Math.max(0, reports - limits.reports) * OVERAGE_RATES.reports,
+                rate: OVERAGE_RATES.reports,
+                percentage: limits.reports === Infinity ? 0 : Math.round((reports / limits.reports) * 100),
             },
         };
 
@@ -166,17 +199,23 @@ export class BillingService {
         try {
             await tenantDb.$connect();
 
-            const [units, parking, monitors, security] = await Promise.all([
+            const now = new Date();
+            const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            const [units, parking, monitors, security, visits, alerts, reports] = await Promise.all([
                 tenantDb.residentProfile.count(),
                 tenantDb.space.count(),
                 tenantDb.user.count({ where: { role: 'ADMIN' } }),
                 tenantDb.user.count({ where: { role: 'SECURITY' } }),
+                tenantDb.visit.count({ where: { createdAt: { gte: periodStart } } }),
+                tenantDb.emergencyAlert.count({ where: { createdAt: { gte: periodStart } } }),
+                tenantDb.incidentReport.count({ where: { createdAt: { gte: periodStart } } }),
             ]);
 
             const details: Record<string, any> = {};
             let totalOverage = 0;
 
-            for (const [resource, current] of Object.entries({ units, parking, monitors, security })) {
+            for (const [resource, current] of Object.entries({ units, parking, monitors, security, visits, alerts, reports })) {
                 const limit = limits[resource];
                 const extra = limit === Infinity ? 0 : Math.max(0, current - limit);
                 const cost = extra * OVERAGE_RATES[resource];
