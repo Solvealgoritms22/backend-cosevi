@@ -44,9 +44,15 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.some(o => o.startsWith(origin) || origin.startsWith(o))) {
+      const allowed = !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        /^http:\/\/localhost:\d+$/.test(origin);
+
+      if (allowed) {
         callback(null, true);
       } else {
+        console.warn(`Blocked CORS request from origin: ${origin}`);
         callback(new Error('Not allowed by CORS'));
       }
     },
