@@ -5,16 +5,34 @@ import sharp from 'sharp';
 
 @Injectable()
 export class UploadsService {
-    private readonly uploadDir = 'uploads/profile-images';
-    private readonly logoDir = 'uploads/logos';
+    private uploadDir = 'uploads/profile-images';
+    private logoDir = 'uploads/logos';
 
     constructor() {
-        // Ensure upload directories exist
-        if (!fs.existsSync(this.uploadDir)) {
-            fs.mkdirSync(this.uploadDir, { recursive: true });
+        // Use /tmp for Vercel environment (Ephemeral storage)
+        if (process.env.VERCEL) {
+            this.uploadDir = '/tmp/uploads/profile-images';
+            this.logoDir = '/tmp/uploads/logos';
         }
-        if (!fs.existsSync(this.logoDir)) {
-            fs.mkdirSync(this.logoDir, { recursive: true });
+
+        try {
+            // Ensure upload directories exist
+            if (!fs.existsSync(this.uploadDir)) {
+                fs.mkdirSync(this.uploadDir, { recursive: true });
+            }
+            if (!fs.existsSync(this.logoDir)) {
+                fs.mkdirSync(this.logoDir, { recursive: true });
+            }
+        } catch (error) {
+            console.warn(`Failed to create upload directories. Fallback to /tmp.`);
+            this.uploadDir = '/tmp/uploads/profile-images';
+            this.logoDir = '/tmp/uploads/logos';
+            if (!fs.existsSync(this.uploadDir)) {
+                fs.mkdirSync(this.uploadDir, { recursive: true });
+            }
+            if (!fs.existsSync(this.logoDir)) {
+                fs.mkdirSync(this.logoDir, { recursive: true });
+            }
         }
     }
 
