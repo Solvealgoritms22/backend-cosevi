@@ -1,4 +1,5 @@
-import { Controller, Post, Body, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, BadRequestException, UseGuards, Get, Request } from '@nestjs/common';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import * as crypto from 'crypto';
@@ -13,6 +14,12 @@ export class AuthController {
     @Post('login')
     async login(@Body() body: any) {
         return this.authService.login(body);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('profile')
+    getProfile(@Request() req) {
+        return req.user;
     }
 
     @Post('verify-resident-qr')

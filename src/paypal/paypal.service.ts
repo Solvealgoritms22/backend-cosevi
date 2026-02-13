@@ -52,43 +52,56 @@ export class PayPalService {
         const accessToken = await this.getAccessToken();
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
 
-        const response = await fetch(`${this.baseUrl}/v2/checkout/orders`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                intent: 'CAPTURE',
-                purchase_units: [
-                    {
-                        reference_id: pendingRegistrationId,
-                        description: `COSEVI - Plan ${plan.charAt(0).toUpperCase() + plan.slice(1)} (Mensual)`,
-                        amount: {
-                            currency_code: 'USD',
-                            value: amount.toFixed(2),
-                        },
-                    },
-                ],
-                application_context: {
-                    brand_name: 'COSEVI',
-                    landing_page: 'NO_PREFERENCE',
-                    user_action: 'PAY_NOW',
-                    return_url: `${frontendUrl}/payment-success?registration=${pendingRegistrationId}`,
-                    cancel_url: `${frontendUrl}/payment-cancelled?registration=${pendingRegistrationId}`,
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+        try {
+            const response = await fetch(`${this.baseUrl}/v2/checkout/orders`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
                 },
-            }),
-        });
+                body: JSON.stringify({
+                    intent: 'CAPTURE',
+                    purchase_units: [
+                        {
+                            reference_id: pendingRegistrationId,
+                            description: `COSEVI - Plan ${plan.charAt(0).toUpperCase() + plan.slice(1)} (Mensual)`,
+                            amount: {
+                                currency_code: 'USD',
+                                value: amount.toFixed(2),
+                            },
+                        },
+                    ],
+                    application_context: {
+                        brand_name: 'COSEVI',
+                        landing_page: 'NO_PREFERENCE',
+                        user_action: 'PAY_NOW',
+                        return_url: `${frontendUrl}/payment-success?registration=${pendingRegistrationId}`,
+                        cancel_url: `${frontendUrl}/payment-cancelled?registration=${pendingRegistrationId}`,
+                    },
+                }),
+                signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
 
-        if (!response.ok) {
-            const error = await response.text();
-            this.logger.error(`PayPal create order failed: ${error}`);
-            throw new Error(`PayPal create order failed: ${response.status}`);
+            if (!response.ok) {
+                const error = await response.text();
+                this.logger.error(`PayPal create order failed: ${error}`);
+                throw new Error(`PayPal create order failed: ${response.status}`);
+            }
+
+            const data = await response.json();
+            this.logger.log(`PayPal order created: ${data.id} for registration ${pendingRegistrationId}`);
+            return data;
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                throw new Error('PayPal request timed out');
+            }
+            throw error;
         }
-
-        const data = await response.json();
-        this.logger.log(`PayPal order created: ${data.id} for registration ${pendingRegistrationId}`);
-        return data;
     }
 
     async captureOrder(orderId: string): Promise<any> {

@@ -37,6 +37,8 @@ export class RegistrationsService {
         plan: string;
         logoUrl?: string;
     }) {
+        this.logger.log(`Starting registration for ${data.email}`);
+
         // Validate plan
         const plan = data.plan || 'starter';
         const amount = PLAN_PRICES[plan];
@@ -45,6 +47,7 @@ export class RegistrationsService {
         }
 
         // Check if email already has a pending registration
+        this.logger.log(`Checking for existing pending registration: ${data.email}`);
         const existing = await this.masterClient.pendingRegistration.findFirst({
             where: {
                 email: data.email,
@@ -54,21 +57,21 @@ export class RegistrationsService {
         });
 
         if (existing) {
+            this.logger.warn(`Existing pending registration found for ${data.email}`);
             throw new BadRequestException(
                 'Ya existe un registro pendiente para este email. Revisa tu bandeja de entrada o espera a que expire el enlace anterior.',
             );
         }
 
-        // Check if email already exists as a tenant admin (via existing tenant)
-        // For now, we'll rely on the user creation step to catch duplicates
-
         // Hash password
+        this.logger.log(`Hashing password for ${data.email}`);
         const passwordHash = await bcrypt.hash(data.password, 10);
 
         // Create pending registration
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + LINK_EXPIRY_HOURS);
 
+        this.logger.log(`Creating pending registration record for ${data.email}`);
         const pending = await this.masterClient.pendingRegistration.create({
             data: {
                 name: data.name,
@@ -88,7 +91,9 @@ export class RegistrationsService {
 
         // Create PayPal order
         try {
+            this.logger.log(`Creating PayPal order for ${pending.id} (Plan: ${plan}, Amount: ${amount})`);
             const order = await this.paypalService.createOrder(plan, amount, pending.id);
+            this.logger.log(`PayPal order created: ${order.id}`);
 
             const approvalLink = order.links.find(l => l.rel === 'approve')?.href;
 
@@ -103,6 +108,7 @@ export class RegistrationsService {
 
             // Send payment email
             if (approvalLink) {
+                this.logger.log(`Sending payment email to ${data.email}`);
                 await this.emailService.sendPaymentLink(
                     data.email,
                     data.name,
@@ -112,6 +118,8 @@ export class RegistrationsService {
                     expiresAt,
                 );
                 this.logger.log(`Payment email sent to ${data.email}`);
+            } else {
+                this.logger.warn(`No approval link found in PayPal order for ${pending.id}`);
             }
 
             return {
@@ -121,12 +129,12 @@ export class RegistrationsService {
                 expiresAt,
             };
         } catch (error) {
+            this.logger.error(`Registration failed at PayPal/Email step: ${error.message}`, error.stack);
             // If PayPal fails, mark registration as cancelled
             await this.masterClient.pendingRegistration.update({
                 where: { id: pending.id },
                 data: { status: 'CANCELLED' },
             });
-            this.logger.error(`PayPal order creation failed: ${error.message}`);
             throw new BadRequestException('Error al crear la orden de pago. Intenta nuevamente.');
         }
     }
