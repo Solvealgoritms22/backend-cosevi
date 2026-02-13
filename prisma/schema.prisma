@@ -21,6 +21,7 @@ model User {
   profileImage    String?
   pushNotificationsEnabled Boolean @default(true)
   pushToken       String?
+  qrSecret        String?          // Secret for rotating QR code (TOTP)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   emergencyAlerts EmergencyAlert[]

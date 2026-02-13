@@ -50,6 +50,8 @@ model PendingRegistration {
   @@index([email])
 }
 
+
+
 model Subscription {
   id                   String             @id @default(uuid())
   tenantId             String

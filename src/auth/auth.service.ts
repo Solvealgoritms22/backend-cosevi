@@ -71,9 +71,22 @@ export class AuthService {
             residentProfileId: user.residentProfile?.id,
         };
 
+        // Check if user has a qrSecret, if not generate one (lazy migration)
+        if (!user.qrSecret) {
+            const secret = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            await this.prisma.user.update({
+                where: { id: user.id },
+                data: { qrSecret: secret }
+            });
+            (user as any).qrSecret = secret;
+        }
+
         return {
             access_token: this.jwtService.sign(payload),
-            user,
+            user: {
+                ...user,
+                qrSecret: (user as any).qrSecret // Ensure it's passed to client
+            },
             tenant: tenantInfo,
         };
     }

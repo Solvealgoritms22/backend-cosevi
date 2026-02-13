@@ -48,15 +48,16 @@ export class VisitsService {
         let isUnique = false;
         let attempts = 0;
         while (!isUnique && attempts < 10) {
-            accessCode = Math.floor(100000 + Math.random() * 900000).toString();
+            // Generate 4 digit code (1000-9999)
+            accessCode = Math.floor(1000 + Math.random() * 9000).toString();
             const existing = await this.prisma.visit.findUnique({ where: { accessCode } });
             if (!existing) isUnique = true;
             attempts++;
         }
 
         if (!isUnique) {
-            // Fallback to a longer string if 6 digits clash (very unlikely)
-            accessCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            // Fallback if 4 digits clash too much (unlikely for active visits)
+            accessCode = Math.random().toString(36).substring(2, 6).toUpperCase();
         }
 
         const newVisit = await this.prisma.visit.create({
