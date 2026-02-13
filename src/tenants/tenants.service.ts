@@ -53,4 +53,11 @@ export class TenantsService implements OnModuleInit, OnModuleDestroy {
             data,
         });
     }
+
+    async updateBranding(tenantId: string, data: { logoUrl?: string; primaryColor?: string; secondaryColor?: string }) {
+        return this.masterClient.tenant.update({
+            where: { id: tenantId },
+            data,
+        });
+    }
 }

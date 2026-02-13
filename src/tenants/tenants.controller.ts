@@ -1,5 +1,7 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Body, NotFoundException, Req, UseGuards } from '@nestjs/common';
 import { TenantsService } from './tenants.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Request } from 'express';
 
 @Controller('tenants')
 export class TenantsController {
@@ -17,6 +19,29 @@ export class TenantsController {
             logoUrl: tenant.logoUrl,
             primaryColor: tenant.primaryColor,
             secondaryColor: tenant.secondaryColor,
+        };
+    }
+
+    // Protected endpoint - update branding for the current tenant
+    @UseGuards(JwtAuthGuard)
+    @Patch('branding')
+    async updateBranding(
+        @Req() req: Request,
+        @Body() body: { logoUrl?: string; primaryColor?: string; secondaryColor?: string },
+    ) {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        if (!tenantId) {
+            throw new NotFoundException('Tenant not identified');
+        }
+
+        const updated = await this.tenantsService.updateBranding(tenantId, body);
+
+        // Return the updated branding
+        return {
+            name: updated.name,
+            logoUrl: updated.logoUrl,
+            primaryColor: updated.primaryColor,
+            secondaryColor: updated.secondaryColor,
         };
     }
 }
