@@ -4,6 +4,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 
 export function setupApp(app: INestApplication) {
+    app.setGlobalPrefix('api');
     // Security Hardening
     app.use(helmet({
         crossOriginEmbedderPolicy: false,
