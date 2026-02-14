@@ -53,6 +53,29 @@ export class TenantsService implements OnModuleInit, OnModuleDestroy {
         });
     }
 
+    // Global User Map methods
+    async getGlobalUser(email: string) {
+        return this.masterClient.globalUserMap.findUnique({
+            where: { email },
+        });
+    }
+
+    async upsertGlobalUser(data: { email: string; tenantId: string; role: string }) {
+        return this.masterClient.globalUserMap.upsert({
+            where: { email: data.email },
+            update: { tenantId: data.tenantId, role: data.role },
+            create: data,
+        });
+    }
+
+    async removeGlobalUser(email: string) {
+        try {
+            return await this.masterClient.globalUserMap.delete({
+                where: { email },
+            });
+        } catch { }
+    }
+
     async getAllTenants() {
         return this.masterClient.tenant.findMany({
             where: { isActive: true },

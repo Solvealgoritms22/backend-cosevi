@@ -248,6 +248,18 @@ export class RegistrationsService {
                 },
             });
             this.logger.log(`Admin user created: ${user.id} in tenant ${tenant.id}`);
+
+            // 6. Sync to Global User Map for Discovery
+            try {
+                await this.tenantsService.upsertGlobalUser({
+                    email: pending.email,
+                    tenantId: tenant.id,
+                    role: 'ADMIN'
+                });
+                this.logger.log(`Admin user ${pending.email} registered in GlobalUserMap`);
+            } catch (error) {
+                this.logger.error(`Failed to register ${pending.email} in GlobalUserMap: ${error.message}`);
+            }
         } finally {
             await tenantDb.$disconnect();
         }

@@ -200,6 +200,12 @@ exports.Prisma.UsageSnapshotScalarFieldEnum = {
   snapshotDate: 'snapshotDate'
 };
 
+exports.Prisma.GlobalUserMapScalarFieldEnum = {
+  email: 'email',
+  tenantId: 'tenantId',
+  role: 'role'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -243,7 +249,8 @@ exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
   PENDING: 'PENDING',
   PAID: 'PAID',
   FAILED: 'FAILED',
-  REFUNDED: 'REFUNDED'
+  REFUNDED: 'REFUNDED',
+  URGENTE: 'URGENTE'
 };
 
 exports.Prisma.ModelName = {
@@ -251,7 +258,8 @@ exports.Prisma.ModelName = {
   PendingRegistration: 'PendingRegistration',
   Subscription: 'Subscription',
   Invoice: 'Invoice',
-  UsageSnapshot: 'UsageSnapshot'
+  UsageSnapshot: 'UsageSnapshot',
+  GlobalUserMap: 'GlobalUserMap'
 };
 
 /**

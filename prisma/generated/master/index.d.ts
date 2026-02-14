@@ -38,6 +38,11 @@ export type Invoice = $Result.DefaultSelection<Prisma.$InvoicePayload>
  * 
  */
 export type UsageSnapshot = $Result.DefaultSelection<Prisma.$UsageSnapshotPayload>
+/**
+ * Model GlobalUserMap
+ * 
+ */
+export type GlobalUserMap = $Result.DefaultSelection<Prisma.$GlobalUserMapPayload>
 
 /**
  * Enums
@@ -67,7 +72,8 @@ export const InvoiceStatus: {
   PENDING: 'PENDING',
   PAID: 'PAID',
   FAILED: 'FAILED',
-  REFUNDED: 'REFUNDED'
+  REFUNDED: 'REFUNDED',
+  URGENTE: 'URGENTE'
 };
 
 export type InvoiceStatus = (typeof InvoiceStatus)[keyof typeof InvoiceStatus]
@@ -258,6 +264,16 @@ export class PrismaClient<
     * ```
     */
   get usageSnapshot(): Prisma.UsageSnapshotDelegate<ExtArgs>;
+
+  /**
+   * `prisma.globalUserMap`: Exposes CRUD operations for the **GlobalUserMap** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GlobalUserMaps
+    * const globalUserMaps = await prisma.globalUserMap.findMany()
+    * ```
+    */
+  get globalUserMap(): Prisma.GlobalUserMapDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -703,7 +719,8 @@ export namespace Prisma {
     PendingRegistration: 'PendingRegistration',
     Subscription: 'Subscription',
     Invoice: 'Invoice',
-    UsageSnapshot: 'UsageSnapshot'
+    UsageSnapshot: 'UsageSnapshot',
+    GlobalUserMap: 'GlobalUserMap'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -719,7 +736,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "tenant" | "pendingRegistration" | "subscription" | "invoice" | "usageSnapshot"
+      modelProps: "tenant" | "pendingRegistration" | "subscription" | "invoice" | "usageSnapshot" | "globalUserMap"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1070,6 +1087,76 @@ export namespace Prisma {
           count: {
             args: Prisma.UsageSnapshotCountArgs<ExtArgs>
             result: $Utils.Optional<UsageSnapshotCountAggregateOutputType> | number
+          }
+        }
+      }
+      GlobalUserMap: {
+        payload: Prisma.$GlobalUserMapPayload<ExtArgs>
+        fields: Prisma.GlobalUserMapFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GlobalUserMapFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GlobalUserMapFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload>
+          }
+          findFirst: {
+            args: Prisma.GlobalUserMapFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GlobalUserMapFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload>
+          }
+          findMany: {
+            args: Prisma.GlobalUserMapFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload>[]
+          }
+          create: {
+            args: Prisma.GlobalUserMapCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload>
+          }
+          createMany: {
+            args: Prisma.GlobalUserMapCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GlobalUserMapCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload>[]
+          }
+          delete: {
+            args: Prisma.GlobalUserMapDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload>
+          }
+          update: {
+            args: Prisma.GlobalUserMapUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload>
+          }
+          deleteMany: {
+            args: Prisma.GlobalUserMapDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GlobalUserMapUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GlobalUserMapUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GlobalUserMapPayload>
+          }
+          aggregate: {
+            args: Prisma.GlobalUserMapAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGlobalUserMap>
+          }
+          groupBy: {
+            args: Prisma.GlobalUserMapGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GlobalUserMapGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GlobalUserMapCountArgs<ExtArgs>
+            result: $Utils.Optional<GlobalUserMapCountAggregateOutputType> | number
           }
         }
       }
@@ -6679,6 +6766,860 @@ export namespace Prisma {
 
 
   /**
+   * Model GlobalUserMap
+   */
+
+  export type AggregateGlobalUserMap = {
+    _count: GlobalUserMapCountAggregateOutputType | null
+    _min: GlobalUserMapMinAggregateOutputType | null
+    _max: GlobalUserMapMaxAggregateOutputType | null
+  }
+
+  export type GlobalUserMapMinAggregateOutputType = {
+    email: string | null
+    tenantId: string | null
+    role: string | null
+  }
+
+  export type GlobalUserMapMaxAggregateOutputType = {
+    email: string | null
+    tenantId: string | null
+    role: string | null
+  }
+
+  export type GlobalUserMapCountAggregateOutputType = {
+    email: number
+    tenantId: number
+    role: number
+    _all: number
+  }
+
+
+  export type GlobalUserMapMinAggregateInputType = {
+    email?: true
+    tenantId?: true
+    role?: true
+  }
+
+  export type GlobalUserMapMaxAggregateInputType = {
+    email?: true
+    tenantId?: true
+    role?: true
+  }
+
+  export type GlobalUserMapCountAggregateInputType = {
+    email?: true
+    tenantId?: true
+    role?: true
+    _all?: true
+  }
+
+  export type GlobalUserMapAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GlobalUserMap to aggregate.
+     */
+    where?: GlobalUserMapWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GlobalUserMaps to fetch.
+     */
+    orderBy?: GlobalUserMapOrderByWithRelationInput | GlobalUserMapOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GlobalUserMapWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GlobalUserMaps from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GlobalUserMaps.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GlobalUserMaps
+    **/
+    _count?: true | GlobalUserMapCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GlobalUserMapMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GlobalUserMapMaxAggregateInputType
+  }
+
+  export type GetGlobalUserMapAggregateType<T extends GlobalUserMapAggregateArgs> = {
+        [P in keyof T & keyof AggregateGlobalUserMap]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGlobalUserMap[P]>
+      : GetScalarType<T[P], AggregateGlobalUserMap[P]>
+  }
+
+
+
+
+  export type GlobalUserMapGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GlobalUserMapWhereInput
+    orderBy?: GlobalUserMapOrderByWithAggregationInput | GlobalUserMapOrderByWithAggregationInput[]
+    by: GlobalUserMapScalarFieldEnum[] | GlobalUserMapScalarFieldEnum
+    having?: GlobalUserMapScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GlobalUserMapCountAggregateInputType | true
+    _min?: GlobalUserMapMinAggregateInputType
+    _max?: GlobalUserMapMaxAggregateInputType
+  }
+
+  export type GlobalUserMapGroupByOutputType = {
+    email: string
+    tenantId: string
+    role: string
+    _count: GlobalUserMapCountAggregateOutputType | null
+    _min: GlobalUserMapMinAggregateOutputType | null
+    _max: GlobalUserMapMaxAggregateOutputType | null
+  }
+
+  type GetGlobalUserMapGroupByPayload<T extends GlobalUserMapGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GlobalUserMapGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GlobalUserMapGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GlobalUserMapGroupByOutputType[P]>
+            : GetScalarType<T[P], GlobalUserMapGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GlobalUserMapSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    email?: boolean
+    tenantId?: boolean
+    role?: boolean
+  }, ExtArgs["result"]["globalUserMap"]>
+
+  export type GlobalUserMapSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    email?: boolean
+    tenantId?: boolean
+    role?: boolean
+  }, ExtArgs["result"]["globalUserMap"]>
+
+  export type GlobalUserMapSelectScalar = {
+    email?: boolean
+    tenantId?: boolean
+    role?: boolean
+  }
+
+
+  export type $GlobalUserMapPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GlobalUserMap"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      email: string
+      tenantId: string
+      role: string
+    }, ExtArgs["result"]["globalUserMap"]>
+    composites: {}
+  }
+
+  type GlobalUserMapGetPayload<S extends boolean | null | undefined | GlobalUserMapDefaultArgs> = $Result.GetResult<Prisma.$GlobalUserMapPayload, S>
+
+  type GlobalUserMapCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GlobalUserMapFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GlobalUserMapCountAggregateInputType | true
+    }
+
+  export interface GlobalUserMapDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GlobalUserMap'], meta: { name: 'GlobalUserMap' } }
+    /**
+     * Find zero or one GlobalUserMap that matches the filter.
+     * @param {GlobalUserMapFindUniqueArgs} args - Arguments to find a GlobalUserMap
+     * @example
+     * // Get one GlobalUserMap
+     * const globalUserMap = await prisma.globalUserMap.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GlobalUserMapFindUniqueArgs>(args: SelectSubset<T, GlobalUserMapFindUniqueArgs<ExtArgs>>): Prisma__GlobalUserMapClient<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one GlobalUserMap that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GlobalUserMapFindUniqueOrThrowArgs} args - Arguments to find a GlobalUserMap
+     * @example
+     * // Get one GlobalUserMap
+     * const globalUserMap = await prisma.globalUserMap.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GlobalUserMapFindUniqueOrThrowArgs>(args: SelectSubset<T, GlobalUserMapFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GlobalUserMapClient<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first GlobalUserMap that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GlobalUserMapFindFirstArgs} args - Arguments to find a GlobalUserMap
+     * @example
+     * // Get one GlobalUserMap
+     * const globalUserMap = await prisma.globalUserMap.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GlobalUserMapFindFirstArgs>(args?: SelectSubset<T, GlobalUserMapFindFirstArgs<ExtArgs>>): Prisma__GlobalUserMapClient<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first GlobalUserMap that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GlobalUserMapFindFirstOrThrowArgs} args - Arguments to find a GlobalUserMap
+     * @example
+     * // Get one GlobalUserMap
+     * const globalUserMap = await prisma.globalUserMap.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GlobalUserMapFindFirstOrThrowArgs>(args?: SelectSubset<T, GlobalUserMapFindFirstOrThrowArgs<ExtArgs>>): Prisma__GlobalUserMapClient<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more GlobalUserMaps that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GlobalUserMapFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GlobalUserMaps
+     * const globalUserMaps = await prisma.globalUserMap.findMany()
+     * 
+     * // Get first 10 GlobalUserMaps
+     * const globalUserMaps = await prisma.globalUserMap.findMany({ take: 10 })
+     * 
+     * // Only select the `email`
+     * const globalUserMapWithEmailOnly = await prisma.globalUserMap.findMany({ select: { email: true } })
+     * 
+     */
+    findMany<T extends GlobalUserMapFindManyArgs>(args?: SelectSubset<T, GlobalUserMapFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a GlobalUserMap.
+     * @param {GlobalUserMapCreateArgs} args - Arguments to create a GlobalUserMap.
+     * @example
+     * // Create one GlobalUserMap
+     * const GlobalUserMap = await prisma.globalUserMap.create({
+     *   data: {
+     *     // ... data to create a GlobalUserMap
+     *   }
+     * })
+     * 
+     */
+    create<T extends GlobalUserMapCreateArgs>(args: SelectSubset<T, GlobalUserMapCreateArgs<ExtArgs>>): Prisma__GlobalUserMapClient<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many GlobalUserMaps.
+     * @param {GlobalUserMapCreateManyArgs} args - Arguments to create many GlobalUserMaps.
+     * @example
+     * // Create many GlobalUserMaps
+     * const globalUserMap = await prisma.globalUserMap.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GlobalUserMapCreateManyArgs>(args?: SelectSubset<T, GlobalUserMapCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GlobalUserMaps and returns the data saved in the database.
+     * @param {GlobalUserMapCreateManyAndReturnArgs} args - Arguments to create many GlobalUserMaps.
+     * @example
+     * // Create many GlobalUserMaps
+     * const globalUserMap = await prisma.globalUserMap.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GlobalUserMaps and only return the `email`
+     * const globalUserMapWithEmailOnly = await prisma.globalUserMap.createManyAndReturn({ 
+     *   select: { email: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GlobalUserMapCreateManyAndReturnArgs>(args?: SelectSubset<T, GlobalUserMapCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a GlobalUserMap.
+     * @param {GlobalUserMapDeleteArgs} args - Arguments to delete one GlobalUserMap.
+     * @example
+     * // Delete one GlobalUserMap
+     * const GlobalUserMap = await prisma.globalUserMap.delete({
+     *   where: {
+     *     // ... filter to delete one GlobalUserMap
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GlobalUserMapDeleteArgs>(args: SelectSubset<T, GlobalUserMapDeleteArgs<ExtArgs>>): Prisma__GlobalUserMapClient<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one GlobalUserMap.
+     * @param {GlobalUserMapUpdateArgs} args - Arguments to update one GlobalUserMap.
+     * @example
+     * // Update one GlobalUserMap
+     * const globalUserMap = await prisma.globalUserMap.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GlobalUserMapUpdateArgs>(args: SelectSubset<T, GlobalUserMapUpdateArgs<ExtArgs>>): Prisma__GlobalUserMapClient<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more GlobalUserMaps.
+     * @param {GlobalUserMapDeleteManyArgs} args - Arguments to filter GlobalUserMaps to delete.
+     * @example
+     * // Delete a few GlobalUserMaps
+     * const { count } = await prisma.globalUserMap.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GlobalUserMapDeleteManyArgs>(args?: SelectSubset<T, GlobalUserMapDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GlobalUserMaps.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GlobalUserMapUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GlobalUserMaps
+     * const globalUserMap = await prisma.globalUserMap.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GlobalUserMapUpdateManyArgs>(args: SelectSubset<T, GlobalUserMapUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one GlobalUserMap.
+     * @param {GlobalUserMapUpsertArgs} args - Arguments to update or create a GlobalUserMap.
+     * @example
+     * // Update or create a GlobalUserMap
+     * const globalUserMap = await prisma.globalUserMap.upsert({
+     *   create: {
+     *     // ... data to create a GlobalUserMap
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GlobalUserMap we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GlobalUserMapUpsertArgs>(args: SelectSubset<T, GlobalUserMapUpsertArgs<ExtArgs>>): Prisma__GlobalUserMapClient<$Result.GetResult<Prisma.$GlobalUserMapPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of GlobalUserMaps.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GlobalUserMapCountArgs} args - Arguments to filter GlobalUserMaps to count.
+     * @example
+     * // Count the number of GlobalUserMaps
+     * const count = await prisma.globalUserMap.count({
+     *   where: {
+     *     // ... the filter for the GlobalUserMaps we want to count
+     *   }
+     * })
+    **/
+    count<T extends GlobalUserMapCountArgs>(
+      args?: Subset<T, GlobalUserMapCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GlobalUserMapCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GlobalUserMap.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GlobalUserMapAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GlobalUserMapAggregateArgs>(args: Subset<T, GlobalUserMapAggregateArgs>): Prisma.PrismaPromise<GetGlobalUserMapAggregateType<T>>
+
+    /**
+     * Group by GlobalUserMap.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GlobalUserMapGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GlobalUserMapGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GlobalUserMapGroupByArgs['orderBy'] }
+        : { orderBy?: GlobalUserMapGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GlobalUserMapGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGlobalUserMapGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GlobalUserMap model
+   */
+  readonly fields: GlobalUserMapFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GlobalUserMap.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GlobalUserMapClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GlobalUserMap model
+   */ 
+  interface GlobalUserMapFieldRefs {
+    readonly email: FieldRef<"GlobalUserMap", 'String'>
+    readonly tenantId: FieldRef<"GlobalUserMap", 'String'>
+    readonly role: FieldRef<"GlobalUserMap", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GlobalUserMap findUnique
+   */
+  export type GlobalUserMapFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+    /**
+     * Filter, which GlobalUserMap to fetch.
+     */
+    where: GlobalUserMapWhereUniqueInput
+  }
+
+  /**
+   * GlobalUserMap findUniqueOrThrow
+   */
+  export type GlobalUserMapFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+    /**
+     * Filter, which GlobalUserMap to fetch.
+     */
+    where: GlobalUserMapWhereUniqueInput
+  }
+
+  /**
+   * GlobalUserMap findFirst
+   */
+  export type GlobalUserMapFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+    /**
+     * Filter, which GlobalUserMap to fetch.
+     */
+    where?: GlobalUserMapWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GlobalUserMaps to fetch.
+     */
+    orderBy?: GlobalUserMapOrderByWithRelationInput | GlobalUserMapOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GlobalUserMaps.
+     */
+    cursor?: GlobalUserMapWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GlobalUserMaps from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GlobalUserMaps.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GlobalUserMaps.
+     */
+    distinct?: GlobalUserMapScalarFieldEnum | GlobalUserMapScalarFieldEnum[]
+  }
+
+  /**
+   * GlobalUserMap findFirstOrThrow
+   */
+  export type GlobalUserMapFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+    /**
+     * Filter, which GlobalUserMap to fetch.
+     */
+    where?: GlobalUserMapWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GlobalUserMaps to fetch.
+     */
+    orderBy?: GlobalUserMapOrderByWithRelationInput | GlobalUserMapOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GlobalUserMaps.
+     */
+    cursor?: GlobalUserMapWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GlobalUserMaps from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GlobalUserMaps.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GlobalUserMaps.
+     */
+    distinct?: GlobalUserMapScalarFieldEnum | GlobalUserMapScalarFieldEnum[]
+  }
+
+  /**
+   * GlobalUserMap findMany
+   */
+  export type GlobalUserMapFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+    /**
+     * Filter, which GlobalUserMaps to fetch.
+     */
+    where?: GlobalUserMapWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GlobalUserMaps to fetch.
+     */
+    orderBy?: GlobalUserMapOrderByWithRelationInput | GlobalUserMapOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GlobalUserMaps.
+     */
+    cursor?: GlobalUserMapWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GlobalUserMaps from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GlobalUserMaps.
+     */
+    skip?: number
+    distinct?: GlobalUserMapScalarFieldEnum | GlobalUserMapScalarFieldEnum[]
+  }
+
+  /**
+   * GlobalUserMap create
+   */
+  export type GlobalUserMapCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+    /**
+     * The data needed to create a GlobalUserMap.
+     */
+    data: XOR<GlobalUserMapCreateInput, GlobalUserMapUncheckedCreateInput>
+  }
+
+  /**
+   * GlobalUserMap createMany
+   */
+  export type GlobalUserMapCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GlobalUserMaps.
+     */
+    data: GlobalUserMapCreateManyInput | GlobalUserMapCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GlobalUserMap createManyAndReturn
+   */
+  export type GlobalUserMapCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many GlobalUserMaps.
+     */
+    data: GlobalUserMapCreateManyInput | GlobalUserMapCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GlobalUserMap update
+   */
+  export type GlobalUserMapUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+    /**
+     * The data needed to update a GlobalUserMap.
+     */
+    data: XOR<GlobalUserMapUpdateInput, GlobalUserMapUncheckedUpdateInput>
+    /**
+     * Choose, which GlobalUserMap to update.
+     */
+    where: GlobalUserMapWhereUniqueInput
+  }
+
+  /**
+   * GlobalUserMap updateMany
+   */
+  export type GlobalUserMapUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GlobalUserMaps.
+     */
+    data: XOR<GlobalUserMapUpdateManyMutationInput, GlobalUserMapUncheckedUpdateManyInput>
+    /**
+     * Filter which GlobalUserMaps to update
+     */
+    where?: GlobalUserMapWhereInput
+  }
+
+  /**
+   * GlobalUserMap upsert
+   */
+  export type GlobalUserMapUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+    /**
+     * The filter to search for the GlobalUserMap to update in case it exists.
+     */
+    where: GlobalUserMapWhereUniqueInput
+    /**
+     * In case the GlobalUserMap found by the `where` argument doesn't exist, create a new GlobalUserMap with this data.
+     */
+    create: XOR<GlobalUserMapCreateInput, GlobalUserMapUncheckedCreateInput>
+    /**
+     * In case the GlobalUserMap was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GlobalUserMapUpdateInput, GlobalUserMapUncheckedUpdateInput>
+  }
+
+  /**
+   * GlobalUserMap delete
+   */
+  export type GlobalUserMapDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+    /**
+     * Filter which GlobalUserMap to delete.
+     */
+    where: GlobalUserMapWhereUniqueInput
+  }
+
+  /**
+   * GlobalUserMap deleteMany
+   */
+  export type GlobalUserMapDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GlobalUserMaps to delete
+     */
+    where?: GlobalUserMapWhereInput
+  }
+
+  /**
+   * GlobalUserMap without action
+   */
+  export type GlobalUserMapDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GlobalUserMap
+     */
+    select?: GlobalUserMapSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -6783,6 +7724,15 @@ export namespace Prisma {
   };
 
   export type UsageSnapshotScalarFieldEnum = (typeof UsageSnapshotScalarFieldEnum)[keyof typeof UsageSnapshotScalarFieldEnum]
+
+
+  export const GlobalUserMapScalarFieldEnum: {
+    email: 'email',
+    tenantId: 'tenantId',
+    role: 'role'
+  };
+
+  export type GlobalUserMapScalarFieldEnum = (typeof GlobalUserMapScalarFieldEnum)[keyof typeof GlobalUserMapScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -7434,6 +8384,48 @@ export namespace Prisma {
     snapshotDate?: DateTimeWithAggregatesFilter<"UsageSnapshot"> | Date | string
   }
 
+  export type GlobalUserMapWhereInput = {
+    AND?: GlobalUserMapWhereInput | GlobalUserMapWhereInput[]
+    OR?: GlobalUserMapWhereInput[]
+    NOT?: GlobalUserMapWhereInput | GlobalUserMapWhereInput[]
+    email?: StringFilter<"GlobalUserMap"> | string
+    tenantId?: StringFilter<"GlobalUserMap"> | string
+    role?: StringFilter<"GlobalUserMap"> | string
+  }
+
+  export type GlobalUserMapOrderByWithRelationInput = {
+    email?: SortOrder
+    tenantId?: SortOrder
+    role?: SortOrder
+  }
+
+  export type GlobalUserMapWhereUniqueInput = Prisma.AtLeast<{
+    email?: string
+    AND?: GlobalUserMapWhereInput | GlobalUserMapWhereInput[]
+    OR?: GlobalUserMapWhereInput[]
+    NOT?: GlobalUserMapWhereInput | GlobalUserMapWhereInput[]
+    tenantId?: StringFilter<"GlobalUserMap"> | string
+    role?: StringFilter<"GlobalUserMap"> | string
+  }, "email">
+
+  export type GlobalUserMapOrderByWithAggregationInput = {
+    email?: SortOrder
+    tenantId?: SortOrder
+    role?: SortOrder
+    _count?: GlobalUserMapCountOrderByAggregateInput
+    _max?: GlobalUserMapMaxOrderByAggregateInput
+    _min?: GlobalUserMapMinOrderByAggregateInput
+  }
+
+  export type GlobalUserMapScalarWhereWithAggregatesInput = {
+    AND?: GlobalUserMapScalarWhereWithAggregatesInput | GlobalUserMapScalarWhereWithAggregatesInput[]
+    OR?: GlobalUserMapScalarWhereWithAggregatesInput[]
+    NOT?: GlobalUserMapScalarWhereWithAggregatesInput | GlobalUserMapScalarWhereWithAggregatesInput[]
+    email?: StringWithAggregatesFilter<"GlobalUserMap"> | string
+    tenantId?: StringWithAggregatesFilter<"GlobalUserMap"> | string
+    role?: StringWithAggregatesFilter<"GlobalUserMap"> | string
+  }
+
   export type TenantCreateInput = {
     id?: string
     name: string
@@ -7993,6 +8985,48 @@ export namespace Prisma {
     incidents?: IntFieldUpdateOperationsInput | number
     emergencies?: IntFieldUpdateOperationsInput | number
     snapshotDate?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GlobalUserMapCreateInput = {
+    email: string
+    tenantId: string
+    role: string
+  }
+
+  export type GlobalUserMapUncheckedCreateInput = {
+    email: string
+    tenantId: string
+    role: string
+  }
+
+  export type GlobalUserMapUpdateInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type GlobalUserMapUncheckedUpdateInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type GlobalUserMapCreateManyInput = {
+    email: string
+    tenantId: string
+    role: string
+  }
+
+  export type GlobalUserMapUpdateManyMutationInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type GlobalUserMapUncheckedUpdateManyInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -8584,6 +9618,24 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type GlobalUserMapCountOrderByAggregateInput = {
+    email?: SortOrder
+    tenantId?: SortOrder
+    role?: SortOrder
+  }
+
+  export type GlobalUserMapMaxOrderByAggregateInput = {
+    email?: SortOrder
+    tenantId?: SortOrder
+    role?: SortOrder
+  }
+
+  export type GlobalUserMapMinOrderByAggregateInput = {
+    email?: SortOrder
+    tenantId?: SortOrder
+    role?: SortOrder
   }
 
   export type SubscriptionCreateNestedManyWithoutTenantInput = {
@@ -10163,6 +11215,10 @@ export namespace Prisma {
      * @deprecated Use UsageSnapshotDefaultArgs instead
      */
     export type UsageSnapshotArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UsageSnapshotDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GlobalUserMapDefaultArgs instead
+     */
+    export type GlobalUserMapArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GlobalUserMapDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

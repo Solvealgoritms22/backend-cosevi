@@ -22,14 +22,25 @@ export class AuthService {
 
         if (!tenantId) {
             console.log(`[AuthService] No x-tenant-id header found. Attempting auto-discovery for ${email}`);
-            const tenant = await this.tenantsService.getTenantByAdminEmail(email);
-            if (tenant) {
-                console.log(`[AuthService] Auto-discovered tenant ${tenant.id} for admin ${email}`);
+
+            // 1. Try Global User Map (covers all users)
+            const globalUser = await this.tenantsService.getGlobalUser(email);
+            if (globalUser) {
+                console.log(`[AuthService] Auto-discovered tenant ${globalUser.tenantId} via GlobalUserMap for ${email}`);
                 if ((this.prisma as any).request) {
-                    (this.prisma as any).request.headers['x-tenant-id'] = tenant.id;
+                    (this.prisma as any).request.headers['x-tenant-id'] = globalUser.tenantId;
                 }
             } else {
-                console.warn(`[AuthService] Could not auto-discover tenant for ${email}`);
+                // 2. Fallback to Admin Email lookup (legacy/migration)
+                const tenant = await this.tenantsService.getTenantByAdminEmail(email);
+                if (tenant) {
+                    console.log(`[AuthService] Auto-discovered tenant ${tenant.id} via AdminEmail for ${email}`);
+                    if ((this.prisma as any).request) {
+                        (this.prisma as any).request.headers['x-tenant-id'] = tenant.id;
+                    }
+                } else {
+                    console.warn(`[AuthService] Could not auto-discover tenant for ${email}`);
+                }
             }
         }
 

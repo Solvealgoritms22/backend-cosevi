@@ -7,6 +7,7 @@ import * as path from 'path';
 import { AppGateway } from '../app.gateway';
 import { PrismaService } from '../prisma.service';
 import { QuotasService } from '../tenants/quotas.service';
+import { TenantsService } from '../tenants/tenants.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -16,6 +17,7 @@ export class UsersService {
         private prisma: PrismaService,
         private gateway: AppGateway,
         private quotasService: QuotasService,
+        private tenantsService: TenantsService,
         @Inject(REQUEST) private request: Request,
     ) { }
 
@@ -89,6 +91,20 @@ export class UsersService {
             }
 
             const tenantId = this.request.headers['x-tenant-id'] as string;
+
+            // Sync with Global User Map for auto-discovery
+            if (tenantId) {
+                try {
+                    await this.tenantsService.upsertGlobalUser({
+                        email: user.email,
+                        tenantId: tenantId,
+                        role: user.role
+                    });
+                } catch (error) {
+                    console.error(`[UsersService] Failed to sync ${user.email} to GlobalUserMap:`, error);
+                }
+            }
+
             this.gateway.emitStatusUpdate({ type: 'USER_CREATED', user }, tenantId);
             return user;
         });
@@ -266,6 +282,20 @@ export class UsersService {
             }
 
             const tenantId = this.request.headers['x-tenant-id'] as string;
+
+            // Sync with Global User Map for discovery
+            if (tenantId) {
+                try {
+                    await this.tenantsService.upsertGlobalUser({
+                        email: user.email,
+                        tenantId: tenantId,
+                        role: user.role
+                    });
+                } catch (error) {
+                    console.error(`[UsersService] Failed to sync update for ${user.email} to GlobalUserMap:`, error);
+                }
+            }
+
             this.gateway.emitStatusUpdate({ type: 'USER_UPDATED', user }, tenantId);
             return user;
         });
@@ -315,6 +345,16 @@ export class UsersService {
             }
 
             const deleted = await tx.user.delete({ where: { id } });
+
+            // Sync with Global User Map (remove)
+            try {
+                // Find user details before delete or use cached? 
+                // Since deleted is the whole object, we have email
+                await this.tenantsService.removeGlobalUser(deleted.email);
+            } catch (error) {
+                console.error(`[UsersService] Failed to remove ${deleted.email} from GlobalUserMap:`, error);
+            }
+
             const tenantId = this.request.headers['x-tenant-id'] as string;
             // Emit outside transaction to avoid blocking, but inside async scope
             this.gateway.emitStatusUpdate({ type: 'USER_DELETED', userId: id }, tenantId);

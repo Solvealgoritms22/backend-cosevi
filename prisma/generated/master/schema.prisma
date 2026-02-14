@@ -129,4 +129,13 @@ enum InvoiceStatus {
   PAID
   FAILED
   REFUNDED
+  URGENTE
+}
+
+model GlobalUserMap {
+  email    String @id
+  tenantId String
+  role     String
+
+  @@index([email])
 }
