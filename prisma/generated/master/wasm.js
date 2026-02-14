@@ -130,6 +130,7 @@ exports.Prisma.TenantScalarFieldEnum = {
   plan: 'plan',
   apiKey: 'apiKey',
   logoUrl: 'logoUrl',
+  adminEmail: 'adminEmail',
   primaryColor: 'primaryColor',
   secondaryColor: 'secondaryColor',
   createdAt: 'createdAt',

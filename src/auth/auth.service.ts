@@ -17,6 +17,22 @@ export class AuthService {
     ) { }
 
     async validateUser(email: string, pass: string): Promise<any> {
+        // Multi-tenant database selection logic
+        const tenantId = (this.prisma as any).request?.headers?.['x-tenant-id'];
+
+        if (!tenantId) {
+            console.log(`[AuthService] No x-tenant-id header found. Attempting auto-discovery for ${email}`);
+            const tenant = await this.tenantsService.getTenantByAdminEmail(email);
+            if (tenant) {
+                console.log(`[AuthService] Auto-discovered tenant ${tenant.id} for admin ${email}`);
+                if ((this.prisma as any).request) {
+                    (this.prisma as any).request.headers['x-tenant-id'] = tenant.id;
+                }
+            } else {
+                console.warn(`[AuthService] Could not auto-discover tenant for ${email}`);
+            }
+        }
+
         const user = await this.prisma.user.findUnique({
             where: { email },
             include: {

@@ -47,6 +47,12 @@ export class TenantsService implements OnModuleInit, OnModuleDestroy {
         });
     }
 
+    async getTenantByAdminEmail(adminEmail: string) {
+        return this.masterClient.tenant.findUnique({
+            where: { adminEmail },
+        });
+    }
+
     async getAllTenants() {
         return this.masterClient.tenant.findMany({
             where: { isActive: true },
@@ -54,7 +60,7 @@ export class TenantsService implements OnModuleInit, OnModuleDestroy {
     }
 
     // Helper to create a new tenant (for the signup flow)
-    async createTenant(data: { name: string; subdomain: string; dbUrl: string; plan: string; location?: string; logoUrl?: string }) {
+    async createTenant(data: { name: string; subdomain: string; dbUrl: string; plan: string; adminEmail?: string; location?: string; logoUrl?: string }) {
         return this.masterClient.tenant.create({
             data,
         });

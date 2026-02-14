@@ -1331,6 +1331,7 @@ export namespace Prisma {
     plan: string | null
     apiKey: string | null
     logoUrl: string | null
+    adminEmail: string | null
     primaryColor: string | null
     secondaryColor: string | null
     createdAt: Date | null
@@ -1347,6 +1348,7 @@ export namespace Prisma {
     plan: string | null
     apiKey: string | null
     logoUrl: string | null
+    adminEmail: string | null
     primaryColor: string | null
     secondaryColor: string | null
     createdAt: Date | null
@@ -1363,6 +1365,7 @@ export namespace Prisma {
     plan: number
     apiKey: number
     logoUrl: number
+    adminEmail: number
     primaryColor: number
     secondaryColor: number
     createdAt: number
@@ -1381,6 +1384,7 @@ export namespace Prisma {
     plan?: true
     apiKey?: true
     logoUrl?: true
+    adminEmail?: true
     primaryColor?: true
     secondaryColor?: true
     createdAt?: true
@@ -1397,6 +1401,7 @@ export namespace Prisma {
     plan?: true
     apiKey?: true
     logoUrl?: true
+    adminEmail?: true
     primaryColor?: true
     secondaryColor?: true
     createdAt?: true
@@ -1413,6 +1418,7 @@ export namespace Prisma {
     plan?: true
     apiKey?: true
     logoUrl?: true
+    adminEmail?: true
     primaryColor?: true
     secondaryColor?: true
     createdAt?: true
@@ -1502,6 +1508,7 @@ export namespace Prisma {
     plan: string
     apiKey: string | null
     logoUrl: string | null
+    adminEmail: string | null
     primaryColor: string | null
     secondaryColor: string | null
     createdAt: Date
@@ -1535,6 +1542,7 @@ export namespace Prisma {
     plan?: boolean
     apiKey?: boolean
     logoUrl?: boolean
+    adminEmail?: boolean
     primaryColor?: boolean
     secondaryColor?: boolean
     createdAt?: boolean
@@ -1555,6 +1563,7 @@ export namespace Prisma {
     plan?: boolean
     apiKey?: boolean
     logoUrl?: boolean
+    adminEmail?: boolean
     primaryColor?: boolean
     secondaryColor?: boolean
     createdAt?: boolean
@@ -1571,6 +1580,7 @@ export namespace Prisma {
     plan?: boolean
     apiKey?: boolean
     logoUrl?: boolean
+    adminEmail?: boolean
     primaryColor?: boolean
     secondaryColor?: boolean
     createdAt?: boolean
@@ -1602,6 +1612,7 @@ export namespace Prisma {
       plan: string
       apiKey: string | null
       logoUrl: string | null
+      adminEmail: string | null
       primaryColor: string | null
       secondaryColor: string | null
       createdAt: Date
@@ -2011,6 +2022,7 @@ export namespace Prisma {
     readonly plan: FieldRef<"Tenant", 'String'>
     readonly apiKey: FieldRef<"Tenant", 'String'>
     readonly logoUrl: FieldRef<"Tenant", 'String'>
+    readonly adminEmail: FieldRef<"Tenant", 'String'>
     readonly primaryColor: FieldRef<"Tenant", 'String'>
     readonly secondaryColor: FieldRef<"Tenant", 'String'>
     readonly createdAt: FieldRef<"Tenant", 'DateTime'>
@@ -6688,6 +6700,7 @@ export namespace Prisma {
     plan: 'plan',
     apiKey: 'apiKey',
     logoUrl: 'logoUrl',
+    adminEmail: 'adminEmail',
     primaryColor: 'primaryColor',
     secondaryColor: 'secondaryColor',
     createdAt: 'createdAt',
@@ -6944,6 +6957,7 @@ export namespace Prisma {
     plan?: StringFilter<"Tenant"> | string
     apiKey?: StringNullableFilter<"Tenant"> | string | null
     logoUrl?: StringNullableFilter<"Tenant"> | string | null
+    adminEmail?: StringNullableFilter<"Tenant"> | string | null
     primaryColor?: StringNullableFilter<"Tenant"> | string | null
     secondaryColor?: StringNullableFilter<"Tenant"> | string | null
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
@@ -6963,6 +6977,7 @@ export namespace Prisma {
     plan?: SortOrder
     apiKey?: SortOrderInput | SortOrder
     logoUrl?: SortOrderInput | SortOrder
+    adminEmail?: SortOrderInput | SortOrder
     primaryColor?: SortOrderInput | SortOrder
     secondaryColor?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -6978,6 +6993,7 @@ export namespace Prisma {
     id?: string
     subdomain?: string
     apiKey?: string
+    adminEmail?: string
     AND?: TenantWhereInput | TenantWhereInput[]
     OR?: TenantWhereInput[]
     NOT?: TenantWhereInput | TenantWhereInput[]
@@ -6994,7 +7010,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionListRelationFilter
     invoices?: InvoiceListRelationFilter
     usageSnapshots?: UsageSnapshotListRelationFilter
-  }, "id" | "subdomain" | "apiKey">
+  }, "id" | "subdomain" | "apiKey" | "adminEmail">
 
   export type TenantOrderByWithAggregationInput = {
     id?: SortOrder
@@ -7004,6 +7020,7 @@ export namespace Prisma {
     plan?: SortOrder
     apiKey?: SortOrderInput | SortOrder
     logoUrl?: SortOrderInput | SortOrder
+    adminEmail?: SortOrderInput | SortOrder
     primaryColor?: SortOrderInput | SortOrder
     secondaryColor?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -7026,6 +7043,7 @@ export namespace Prisma {
     plan?: StringWithAggregatesFilter<"Tenant"> | string
     apiKey?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     logoUrl?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    adminEmail?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     primaryColor?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     secondaryColor?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
@@ -7424,6 +7442,7 @@ export namespace Prisma {
     plan?: string
     apiKey?: string | null
     logoUrl?: string | null
+    adminEmail?: string | null
     primaryColor?: string | null
     secondaryColor?: string | null
     createdAt?: Date | string
@@ -7443,6 +7462,7 @@ export namespace Prisma {
     plan?: string
     apiKey?: string | null
     logoUrl?: string | null
+    adminEmail?: string | null
     primaryColor?: string | null
     secondaryColor?: string | null
     createdAt?: Date | string
@@ -7462,6 +7482,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7481,6 +7502,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7500,6 +7522,7 @@ export namespace Prisma {
     plan?: string
     apiKey?: string | null
     logoUrl?: string | null
+    adminEmail?: string | null
     primaryColor?: string | null
     secondaryColor?: string | null
     createdAt?: Date | string
@@ -7516,6 +7539,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7532,6 +7556,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8059,6 +8084,7 @@ export namespace Prisma {
     plan?: SortOrder
     apiKey?: SortOrder
     logoUrl?: SortOrder
+    adminEmail?: SortOrder
     primaryColor?: SortOrder
     secondaryColor?: SortOrder
     createdAt?: SortOrder
@@ -8075,6 +8101,7 @@ export namespace Prisma {
     plan?: SortOrder
     apiKey?: SortOrder
     logoUrl?: SortOrder
+    adminEmail?: SortOrder
     primaryColor?: SortOrder
     secondaryColor?: SortOrder
     createdAt?: SortOrder
@@ -8091,6 +8118,7 @@ export namespace Prisma {
     plan?: SortOrder
     apiKey?: SortOrder
     logoUrl?: SortOrder
+    adminEmail?: SortOrder
     primaryColor?: SortOrder
     secondaryColor?: SortOrder
     createdAt?: SortOrder
@@ -9334,6 +9362,7 @@ export namespace Prisma {
     plan?: string
     apiKey?: string | null
     logoUrl?: string | null
+    adminEmail?: string | null
     primaryColor?: string | null
     secondaryColor?: string | null
     createdAt?: Date | string
@@ -9352,6 +9381,7 @@ export namespace Prisma {
     plan?: string
     apiKey?: string | null
     logoUrl?: string | null
+    adminEmail?: string | null
     primaryColor?: string | null
     secondaryColor?: string | null
     createdAt?: Date | string
@@ -9428,6 +9458,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9446,6 +9477,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9480,6 +9512,7 @@ export namespace Prisma {
     plan?: string
     apiKey?: string | null
     logoUrl?: string | null
+    adminEmail?: string | null
     primaryColor?: string | null
     secondaryColor?: string | null
     createdAt?: Date | string
@@ -9498,6 +9531,7 @@ export namespace Prisma {
     plan?: string
     apiKey?: string | null
     logoUrl?: string | null
+    adminEmail?: string | null
     primaryColor?: string | null
     secondaryColor?: string | null
     createdAt?: Date | string
@@ -9594,6 +9628,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9612,6 +9647,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9704,6 +9740,7 @@ export namespace Prisma {
     plan?: string
     apiKey?: string | null
     logoUrl?: string | null
+    adminEmail?: string | null
     primaryColor?: string | null
     secondaryColor?: string | null
     createdAt?: Date | string
@@ -9722,6 +9759,7 @@ export namespace Prisma {
     plan?: string
     apiKey?: string | null
     logoUrl?: string | null
+    adminEmail?: string | null
     primaryColor?: string | null
     secondaryColor?: string | null
     createdAt?: Date | string
@@ -9793,6 +9831,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9811,6 +9850,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     apiKey?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    adminEmail?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

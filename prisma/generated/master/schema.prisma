@@ -17,6 +17,7 @@ model Tenant {
   plan           String          @default("starter")
   apiKey         String?         @unique @default(cuid())
   logoUrl        String?
+  adminEmail     String?         @unique
   primaryColor   String?         @default("#4f46e5")
   secondaryColor String?         @default("#1e293b")
   createdAt      DateTime        @default(now())

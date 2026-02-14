@@ -190,6 +190,7 @@ export class RegistrationsService {
             subdomain: `${subdomain}-${Math.random().toString(36).substring(7)}`,
             dbUrl: process.env.DATABASE_URL || 'file:./dev.db',
             plan: pending.plan,
+            adminEmail: pending.email,
             location: pending.location || undefined,
             logoUrl: pending.logoUrl || undefined,
         });
