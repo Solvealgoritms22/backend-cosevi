@@ -43,14 +43,14 @@ export class EmailService {
         console.log(`Attempting to send payment link to ${to}...`);
         try {
             const info = await this.transporter.sendMail({
-                from: `"ENTRA" <${process.env.EMAIL_USER}>`,
+                from: `"ENTRAR" <${process.env.EMAIL_USER}>`,
                 to,
-                subject: '🔐 Completa tu suscripción - ENTRA',
+                subject: 'Completa tu suscripción - ENTRAR',
                 html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
-                    <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 32px; text-align: center;">
-                        <h1 style="color: white; margin: 0; font-size: 28px;">ENTRA</h1>
-                        <p style="color: #e0e7ff; margin: 8px 0 0;">Sistema de Gestión Residencial</p>
+                    <div style="background: #1e293b; padding: 32px; text-align: center;">
+                        <img src="${process.env.FRONTEND_URL || 'https://frontend-cosevi.vercel.app'}/logo-official.png" alt="ENTRA" style="height: 60px; margin-bottom: 8px;">
+                        <p style="color: #e0e7ff; margin: 4px 0 0; font-size: 14px; font-weight: 500; letter-spacing: 0.5px;">Sistema de Control de Acceso</p>
                     </div>
                     <div style="padding: 32px;">
                         <h2 style="color: #1e293b; margin: 0 0 16px;">¡Hola ${name}!</h2>
@@ -74,8 +74,9 @@ export class EmailService {
                             </table>
                         </div>
                         <div style="text-align: center; margin: 32px 0;">
-                            <a href="${paymentUrl}" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">
-                                💳 Pagar con PayPal
+                            <a href="${paymentUrl}" style="background: #0070ba; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; gap: 10px;">
+                                <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" style="height: 20px; vertical-align: middle; margin-right: 8px;">
+                                Pagar con PayPal
                             </a>
                         </div>
                         <p style="color: #94a3b8; font-size: 13px; text-align: center;">
@@ -84,7 +85,7 @@ export class EmailService {
                         </p>
                     </div>
                     <div style="background: #1e293b; padding: 20px; text-align: center;">
-                        <p style="color: #94a3b8; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} ENTRA. Todos los derechos reservados.</p>
+                        <p style="color: #94a3b8; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} ENTRAR. Todos los derechos reservados.</p>
                     </div>
                 </div>
             `,
@@ -106,7 +107,8 @@ export class EmailService {
                 html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 32px; text-align: center;">
-                        <h1 style="color: white; margin: 0; font-size: 28px;">🎉 ¡Bienvenido!</h1>
+                        <img src="${process.env.FRONTEND_URL || 'https://frontend-cosevi.vercel.app'}/logo-official.png" alt="ENTRA" style="height: 60px; margin-bottom: 8px;">
+                        <h1 style="color: white; margin: 0; font-size: 24px;">🎉 ¡Bienvenido!</h1>
                     </div>
                     <div style="padding: 32px;">
                         <h2 style="color: #1e293b; margin: 0 0 16px;">Hola ${name},</h2>
@@ -177,6 +179,7 @@ export class EmailService {
                 html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 32px; text-align: center;">
+                        <img src="${process.env.FRONTEND_URL || 'https://frontend-cosevi.vercel.app'}/logo-official.png" alt="ENTRA" style="height: 60px; margin-bottom: 8px;">
                         <h1 style="color: white; margin: 0; font-size: 24px;">📄 Factura Mensual</h1>
                         <p style="color: #e0e7ff; margin: 8px 0 0;">${invoice.billingPeriod}</p>
                     </div>
