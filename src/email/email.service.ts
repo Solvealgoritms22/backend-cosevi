@@ -101,9 +101,9 @@ export class EmailService {
         console.log(`Attempting to send welcome email to ${to}...`);
         try {
             const info = await this.transporter.sendMail({
-                from: `"ENTRA" <${process.env.EMAIL_USER}>`,
+                from: `"ENTRAR" <${process.env.EMAIL_USER}>`,
                 to,
-                subject: '¡Bienvenido a ENTRA!',
+                subject: '¡Bienvenido a ENTRAR!',
                 html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: linear-gradient(135deg, #007e56ff, #06ac75ff); padding: 32px; text-align: center;">
@@ -215,7 +215,8 @@ export class EmailService {
     }
 
     async sendPasswordResetEmail(to: string, name: string, token: string) {
-        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/reset-password?token=${token}`;
+        const baseUrl = (process.env.FRONTEND_URL || 'http://localhost:3001').replace(/\/$/, '');
+        const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
         console.log(`Attempting to send password reset email to ${to}...`);
         try {
