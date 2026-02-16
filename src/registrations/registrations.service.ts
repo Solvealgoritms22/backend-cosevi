@@ -144,7 +144,6 @@ export class RegistrationsService {
     }
 
     async confirmPayment(registrationId: string, paypalToken: string) {
-        console.log(`[DEBUG] confirmPayment called for registrationId: ${registrationId}, token: ${paypalToken}`);
         this.logger.log(`Confirming payment for registration: ${registrationId}`);
 
         const pending = await this.masterClient.pendingRegistration.findUnique({
@@ -189,12 +188,9 @@ export class RegistrationsService {
             this.logger.log(`Capturing order ${pending.paypalOrderId} for registration ${registrationId}`);
             captureResult = await this.paypalService.captureOrder(pending.paypalOrderId!);
         } catch (error) {
-            console.error(`[DEBUG] Payment capture failed:`, error);
             this.logger.error(`Payment capture failed: ${error.message}`);
             throw new BadRequestException('Error al procesar el pago con PayPal. Verifica tu cuenta o intenta más tarde.');
         }
-
-        console.log(`[DEBUG] Capture result status: ${captureResult?.status}`);
 
         if (captureResult.status !== 'COMPLETED' && captureResult.status !== 'APPROVED') {
             this.logger.error(`PayPal order status is not valid for activation: ${captureResult.status}`);
@@ -206,17 +202,10 @@ export class RegistrationsService {
 
         // Update status immediately (atomic-ish)
         // Update status immediately (atomic-ish)
-        try {
-            console.log(`[DEBUG] Updating status to PAID for ${pending.id}`);
-            await this.masterClient.pendingRegistration.update({
-                where: { id: pending.id },
-                data: { status: 'PAID' },
-            });
-            console.log(`[DEBUG] Status updated to PAID`);
-        } catch (e) {
-            console.error(`[DEBUG] Failed to update status:`, e);
-            throw e;
-        }
+        await this.masterClient.pendingRegistration.update({
+            where: { id: pending.id },
+            data: { status: 'PAID' },
+        });
 
         // 1. Create/Find Tenant
         let tenant = await this.masterClient.tenant.findUnique({

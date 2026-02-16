@@ -74,7 +74,7 @@ export class EmailService {
                             </table>
                         </div>
                         <div style="text-align: center; margin: 32px 0;">
-                            <a href="${paymentUrl}" style="background: #0070ba; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; gap: 10px;">
+                            <a href="${paymentUrl}" style="background: #005f9fff; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; gap: 10px;">
                                 <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" style="height: 20px; vertical-align: middle; margin-right: 8px;">
                                 Pagar con PayPal
                             </a>
@@ -103,10 +103,10 @@ export class EmailService {
             const info = await this.transporter.sendMail({
                 from: `"ENTRA" <${process.env.EMAIL_USER}>`,
                 to,
-                subject: '🎉 ¡Bienvenido a ENTRA!',
+                subject: '¡Bienvenido a ENTRA!',
                 html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
-                    <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 32px; text-align: center;">
+                    <div style="background: linear-gradient(135deg, #007e56ff, #06ac75ff); padding: 32px; text-align: center;">
                         <img src="${process.env.FRONTEND_URL || 'https://frontend-cosevi.vercel.app'}/logo-official.png" alt="ENTRA" style="height: 60px; margin-bottom: 8px;">
                         <h1 style="color: white; margin: 0; font-size: 24px;">🎉 ¡Bienvenido!</h1>
                     </div>
@@ -119,7 +119,7 @@ export class EmailService {
                             Ya puedes iniciar sesión y comenzar a configurar tu sistema de gestión residencial.
                         </p>
                         <div style="text-align: center; margin: 32px 0;">
-                            <a href="${process.env.FRONTEND_URL || 'http://localhost:3001'}/login" style="background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">
+                            <a href="${process.env.FRONTEND_URL || 'http://localhost:3001'}/login" style="background: linear-gradient(135deg, #007e56ff, #06ac75ff); color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">
                                 Iniciar Sesión
                             </a>
                         </div>
