@@ -4,7 +4,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 
 export function setupApp(app: INestApplication) {
-    // app.setGlobalPrefix('api', { exclude: ['/'] }); // Removed to avoid double /api/api issue with Vercel rewrites or frontend config
+    app.setGlobalPrefix('api', { exclude: ['/'] });
     // Security Hardening
     app.use(helmet({
         crossOriginEmbedderPolicy: false,
