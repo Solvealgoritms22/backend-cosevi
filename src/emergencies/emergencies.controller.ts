@@ -12,7 +12,7 @@ export class EmergenciesController {
     @Post()
     @Plan(PLANS.PREMIUM)
     create(@Request() req, @Body() createEmergencyDto: CreateEmergencyDto) {
-        return this.emergenciesService.create(req.user.userId, createEmergencyDto);
+        return this.emergenciesService.create(req.user.userId, createEmergencyDto, req.user.tenantId);
     }
 
     @Get()

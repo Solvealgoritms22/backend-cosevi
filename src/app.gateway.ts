@@ -40,5 +40,11 @@ export class AppGateway {
         const channel = this.getTenantChannel(tid, 'visits');
         this.pusherService.trigger(channel, 'incidentStatusUpdated', data);
     }
+
+    emitEmergencyAlert(data: any, tenantId?: string) {
+        const tid = tenantId || 'global';
+        const channel = this.getTenantChannel(tid, 'emergencies');
+        this.pusherService.trigger(channel, 'emergencyAlert', data);
+    }
 }
 

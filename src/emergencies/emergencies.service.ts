@@ -15,7 +15,7 @@ export class EmergenciesService {
         private pushNotifications: PushNotificationsService
     ) { }
 
-    async create(userId: string, createEmergencyDto: CreateEmergencyDto) {
+    async create(userId: string, createEmergencyDto: CreateEmergencyDto, tenantId?: string) {
         const emergency = await this.prisma.emergencyAlert.create({
             data: {
                 ...createEmergencyDto,
@@ -34,8 +34,8 @@ export class EmergenciesService {
             },
         });
 
-        // Emit real-time event (Socket.io)
-        this.gateway.server.emit('emergencyAlert', emergency);
+        // Emit real-time event (Pusher)
+        this.gateway.emitEmergencyAlert(emergency, tenantId);
 
         // Send Push Notifications
         const senderRole = emergency.sender.role;
