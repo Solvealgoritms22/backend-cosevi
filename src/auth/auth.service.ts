@@ -242,13 +242,31 @@ export class AuthService {
     }
 
     async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+        let tenantId: string | undefined;
+
+        // 1. Auto-discover tenant for the email
+        const globalUser = await this.tenantsService.getGlobalUser(forgotPasswordDto.email);
+        if (globalUser) {
+            tenantId = globalUser.tenantId;
+        } else {
+            const tenant = await this.tenantsService.getTenantByAdminEmail(forgotPasswordDto.email);
+            if (tenant) {
+                tenantId = tenant.id;
+            }
+        }
+
+        // 2. Set tenant context if discovered
+        if (tenantId && (this.prisma as any).request) {
+            (this.prisma as any).request.headers['x-tenant-id'] = tenantId;
+        }
+
         const user = await this.prisma.user.findUnique({ where: { email: forgotPasswordDto.email } });
         if (!user) {
             // Return success even if user not found to prevent enumeration
             return { message: 'If an account exists, a reset link has been sent.' };
         }
 
-        const payload = { sub: user.id, email: user.email, type: 'reset' };
+        const payload = { sub: user.id, email: user.email, type: 'reset', tenantId };
         const token = this.jwtService.sign(payload, { expiresIn: '1h' });
 
         await this.emailService.sendPasswordResetEmail(user.email, user.name || 'Usuario', token);
@@ -260,6 +278,11 @@ export class AuthService {
             const payload = this.jwtService.verify(resetPasswordDto.token);
             if (payload.type !== 'reset') {
                 throw new BadRequestException('Invalid token type');
+            }
+
+            // Set tenant context from token payload
+            if (payload.tenantId && (this.prisma as any).request) {
+                (this.prisma as any).request.headers['x-tenant-id'] = payload.tenantId;
             }
 
             const salt = await bcrypt.genSalt();
