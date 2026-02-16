@@ -152,6 +152,62 @@ export class PayPalService {
         return response.json();
     }
 
+    async createSubscription(
+        planId: string,
+        customId: string,
+    ): Promise<any> {
+        const accessToken = await this.getAccessToken();
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+        const response = await fetch(`${this.baseUrl}/v1/billing/subscriptions`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+                plan_id: planId,
+                custom_id: customId,
+                application_context: {
+                    brand_name: 'ENTRAR',
+                    locale: 'es-ES',
+                    shipping_preference: 'NO_SHIPPING',
+                    user_action: 'SUBSCRIBE_NOW',
+                    return_url: `${frontendUrl}/payment-success?registration=${customId}`,
+                    cancel_url: `${frontendUrl}/payment-cancelled?registration=${customId}`,
+                }
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            this.logger.error(`PayPal create subscription failed: ${error}`);
+            throw new Error(`PayPal create subscription failed: ${response.status}`);
+        }
+
+        return response.json();
+    }
+
+    async getSubscriptionDetails(subscriptionId: string): Promise<any> {
+        const accessToken = await this.getAccessToken();
+
+        const response = await fetch(`${this.baseUrl}/v1/billing/subscriptions/${subscriptionId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            this.logger.error(`PayPal get subscription failed: ${error}`);
+            throw new Error(`PayPal get subscription failed: ${response.status}`);
+        }
+
+        return response.json();
+    }
+
     async verifyWebhookSignature(
         headers: Record<string, string>,
         body: string,
@@ -188,5 +244,88 @@ export class PayPalService {
 
         const data = await response.json();
         return data.verification_status === 'SUCCESS';
+    }
+
+    async createProduct(name: string, description: string): Promise<any> {
+        const accessToken = await this.getAccessToken();
+        const response = await fetch(`${this.baseUrl}/v1/catalogs/products`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name,
+                description,
+                type: 'SERVICE',
+                category: 'SOFTWARE',
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            this.logger.error(`PayPal create product failed: ${error}`);
+            throw new Error(`PayPal create product failed: ${response.status}`);
+        }
+
+        return response.json();
+    }
+
+    async createPlan(productId: string, name: string, description: string, price: number): Promise<any> {
+        const accessToken = await this.getAccessToken();
+        const response = await fetch(`${this.baseUrl}/v1/billing/plans`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                name,
+                description,
+                status: 'ACTIVE',
+                billing_cycles: [
+                    {
+                        frequency: {
+                            interval_unit: 'MONTH',
+                            interval_count: 1,
+                        },
+                        tenure_type: 'REGULAR',
+                        sequence: 1,
+                        total_cycles: 0, // 0 = Infinite
+                        pricing_scheme: {
+                            fixed_price: {
+                                value: price.toFixed(2),
+                                currency_code: 'USD',
+                            },
+                        },
+                    },
+                ],
+                payment_preferences: {
+                    auto_bill_outstanding: true,
+                    setup_fee_failure_action: 'CONTINUE',
+                    payment_failure_threshold: 3,
+                },
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            this.logger.error(`PayPal create plan failed: ${error}`);
+            throw new Error(`PayPal create plan failed: ${response.status}`);
+        }
+
+        return response.json();
+    }
+
+    async listProducts(): Promise<any> {
+        const accessToken = await this.getAccessToken();
+        const response = await fetch(`${this.baseUrl}/v1/catalogs/products`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+            },
+        });
+        return response.json();
     }
 }

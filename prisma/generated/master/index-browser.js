@@ -310,6 +310,7 @@ exports.Prisma.PendingRegistrationScalarFieldEnum = {
   plan: 'plan',
   logoUrl: 'logoUrl',
   paypalOrderId: 'paypalOrderId',
+  paypalSubscriptionId: 'paypalSubscriptionId',
   paymentLink: 'paymentLink',
   amount: 'amount',
   status: 'status',

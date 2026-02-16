@@ -79,6 +79,7 @@ export class AuthService {
         if (tenantId) {
             const tenant = await this.tenantsService.getTenantById(tenantId) as any;
             if (tenant) {
+                const subInfo = await this.tenantsService.getSubscriptionStatus(tenantId);
                 tenantInfo = {
                     id: tenant.id,
                     name: tenant.name,
@@ -89,6 +90,8 @@ export class AuthService {
                         secondaryColor: tenant.secondaryColor,
                     },
                     apiKey: tenant.apiKey,
+                    subscriptionStatus: subInfo.status,
+                    subscriptionPeriodEnd: subInfo.currentPeriodEnd,
                 };
             }
         }
@@ -99,6 +102,8 @@ export class AuthService {
             role: user.role,
             tenantId: tenantId,
             plan: tenantInfo?.plan || 'starter',
+            subscriptionStatus: tenantInfo?.subscriptionStatus || 'ACTIVE',
+            subscriptionPeriodEnd: tenantInfo?.subscriptionPeriodEnd,
             residentProfileId: user.residentProfile?.id,
         };
 
@@ -164,6 +169,8 @@ export class AuthService {
                 sub: user.id,
                 role: user.role,
                 tenantId: tenantId,
+                plan: plan || 'starter',
+                subscriptionStatus: 'ACTIVE',
                 residentProfileId: (user as any).residentProfile?.id,
             };
 
@@ -198,6 +205,20 @@ export class AuthService {
             },
         });
 
+        if (!user) return null;
+
+        const tenantId = (this.prisma as any).request?.headers?.['x-tenant-id'];
+        let subscriptionStatus = 'ACTIVE';
+        if (tenantId) {
+            const subInfo = await this.tenantsService.getSubscriptionStatus(tenantId);
+            subscriptionStatus = subInfo.status;
+        }
+
+        const result = {
+            ...user,
+            subscriptionStatus,
+        };
+
         if (user?.residentProfile?.assignedSpaces) {
             const spaceIds = user.residentProfile.assignedSpaces.map((s) => s.id);
             const activeVisits = await this.prisma.visit.findMany({
@@ -217,7 +238,7 @@ export class AuthService {
             );
         }
 
-        return user;
+        return result;
     }
 
     async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {

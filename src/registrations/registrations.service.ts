@@ -1,4 +1,5 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import { PrismaClient as MasterClient } from '../../prisma/generated/master';
 import { PrismaClient } from '@prisma/client';
 import { PayPalService } from '../paypal/paypal.service';
 import { EmailService } from '../email/email.service';
@@ -13,17 +14,23 @@ const PLAN_PRICES: Record<string, number> = {
 
 const LINK_EXPIRY_HOURS = 24;
 
+const PAYPAL_PLAN_IDS: Record<string, string> = {
+    starter: process.env.PAYPAL_STARTER_PLAN_ID || 'P-PLACEHOLDER_STARTER',
+    premium: process.env.PAYPAL_PREMIUM_PLAN_ID || 'P-PLACEHOLDER_PREMIUM',
+    elite: process.env.PAYPAL_ELITE_PLAN_ID || 'P-PLACEHOLDER_ELITE',
+};
+
 @Injectable()
 export class RegistrationsService {
     private readonly logger = new Logger(RegistrationsService.name);
-    private masterClient: PrismaClient;
+    private masterClient: MasterClient;
 
     constructor(
         private paypalService: PayPalService,
         private emailService: EmailService,
         private tenantsService: TenantsService,
     ) {
-        this.masterClient = new PrismaClient({
+        this.masterClient = new MasterClient({
             datasources: { db: { url: process.env.MASTER_DATABASE_URL } },
         });
     }
@@ -90,19 +97,25 @@ export class RegistrationsService {
 
         this.logger.log(`Pending registration created: ${pending.id} for ${data.email}`);
 
-        // Create PayPal order
+        // Create PayPal subscription
         try {
-            this.logger.log(`Creating PayPal order for ${pending.id} (Plan: ${plan}, Amount: ${amount})`);
-            const order = await this.paypalService.createOrder(plan, amount, pending.id);
-            this.logger.log(`PayPal order created: ${order.id}`);
+            this.logger.log(`Creating PayPal subscription for ${pending.id} (Plan: ${plan})`);
 
-            const approvalLink = order.links.find(l => l.rel === 'approve')?.href;
+            const paypalPlanId = PAYPAL_PLAN_IDS[plan];
+            if (!paypalPlanId || paypalPlanId.includes('PLACEHOLDER')) {
+                throw new Error(`PayPal Plan ID not configured for tier: ${plan}. Please check your .env file.`);
+            }
+
+            const subscription = await this.paypalService.createSubscription(paypalPlanId, pending.id);
+            this.logger.log(`PayPal subscription created: ${subscription.id}`);
+
+            const approvalLink = subscription.links.find(l => l.rel === 'approve')?.href;
 
             // Update pending registration with PayPal details
             await this.masterClient.pendingRegistration.update({
                 where: { id: pending.id },
                 data: {
-                    paypalOrderId: order.id,
+                    paypalSubscriptionId: subscription.id,
                     paymentLink: approvalLink,
                 },
             });
@@ -110,7 +123,6 @@ export class RegistrationsService {
             // Send payment email
             if (approvalLink) {
                 this.logger.log(`Sending payment email to ${data.email}`);
-                // Await email send to ensure completion in Serverless environments
                 await this.emailService.sendPaymentLink(
                     data.email,
                     data.name,
@@ -120,26 +132,23 @@ export class RegistrationsService {
                     expiresAt,
                 );
                 this.logger.log(`Payment email sent successfully to ${data.email}`);
-            } else {
-                this.logger.warn(`No approval link found in PayPal order for ${pending.id}`);
             }
 
             return {
                 id: pending.id,
                 status: 'PENDING',
-                message: 'Se ha enviado un enlace de pago a tu correo electrónico.',
+                message: 'Se ha enviado un enlace de suscripción a tu correo electrónico.',
                 expiresAt,
             };
         } catch (error) {
-            this.logger.error(`Registration failed: ${error.message}`, error.stack);
+            this.logger.error(`Subscription creation failed: ${error.message}`, error.stack);
             if (pending) {
-                // If PayPal fails, mark registration as cancelled
                 await this.masterClient.pendingRegistration.update({
                     where: { id: pending.id },
                     data: { status: 'CANCELLED' },
                 }).catch(e => this.logger.error(`Failed to cancel registration ${pending.id}: ${e.message}`));
             }
-            throw new BadRequestException(error.message || 'Error al procesar el registro. Intenta nuevamente.');
+            throw new BadRequestException(error.message || 'Error al procesar la suscripción. Intenta nuevamente.');
         }
     }
 
@@ -182,19 +191,20 @@ export class RegistrationsService {
             throw new BadRequestException('El enlace de pago ha expirado. Por favor, registra tu cuenta nuevamente.');
         }
 
-        // --- PAYPAL CAPTURE ---
-        let captureResult: any;
+        // --- PAYPAL SUBSCRIPTION VERIFICATION ---
+        let subscriptionDetails: any;
         try {
-            this.logger.log(`Capturing order ${pending.paypalOrderId} for registration ${registrationId}`);
-            captureResult = await this.paypalService.captureOrder(pending.paypalOrderId!);
+            const subscriptionId = pending.paypalSubscriptionId || paypalToken;
+            this.logger.log(`Verifying subscription ${subscriptionId} for registration ${registrationId}`);
+            subscriptionDetails = await this.paypalService.getSubscriptionDetails(subscriptionId);
         } catch (error) {
-            this.logger.error(`Payment capture failed: ${error.message}`);
-            throw new BadRequestException('Error al procesar el pago con PayPal. Verifica tu cuenta o intenta más tarde.');
+            this.logger.error(`Subscription verification failed: ${error.message}`);
+            throw new BadRequestException('Error al verificar la suscripción con PayPal. Verifica tu cuenta o intenta más tarde.');
         }
 
-        if (captureResult.status !== 'COMPLETED' && captureResult.status !== 'APPROVED') {
-            this.logger.error(`PayPal order status is not valid for activation: ${captureResult.status}`);
-            throw new BadRequestException(`El pago no ha sido completado aún (Estado: ${captureResult.status}).`);
+        if (subscriptionDetails.status !== 'ACTIVE' && subscriptionDetails.status !== 'APPROVED') {
+            this.logger.error(`PayPal subscription status is not valid for activation: ${subscriptionDetails.status}`);
+            throw new BadRequestException(`La suscripción no está activa aún (Estado: ${subscriptionDetails.status}).`);
         }
 
         // --- FINALIZATION ---
@@ -226,7 +236,7 @@ export class RegistrationsService {
             this.logger.log(`Tenant created: ${tenant.id} for ${pending.organizationName}`);
         }
 
-        // 2. Create Subscription
+        // 2. Create Subscription Record in DB
         const now = new Date();
         const periodEnd = new Date(now);
         periodEnd.setMonth(periodEnd.getMonth() + 1);
@@ -242,14 +252,15 @@ export class RegistrationsService {
                     plan: pending.plan,
                     amount: pending.amount,
                     status: 'ACTIVE',
+                    paypalSubscriptionId: pending.paypalSubscriptionId,
                     currentPeriodStart: now,
                     currentPeriodEnd: periodEnd,
                 },
             });
         }
 
-        // 3. Create Invoice
-        const paypalPaymentId = captureResult.purchase_units?.[0]?.payments?.captures?.[0]?.id || 'MANUAL-CONFIRM';
+        // 3. Create Invoice Record
+        const paypalPaymentId = pending.paypalSubscriptionId || 'SUBSCRIPTION-ACT';
         const existingInvoice = await this.masterClient.invoice.findFirst({
             where: { tenantId: tenant.id, totalAmount: pending.amount }
         });

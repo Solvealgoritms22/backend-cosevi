@@ -103,4 +103,20 @@ export class TenantsService implements OnModuleInit, OnModuleDestroy {
             data: { apiKey },
         });
     }
+
+    async getSubscriptionStatus(tenantId: string) {
+        const subscription = await this.masterClient.subscription.findFirst({
+            where: { tenantId },
+            orderBy: { currentPeriodEnd: 'desc' },
+        });
+
+        if (!subscription) {
+            return { status: 'ACTIVE', currentPeriodEnd: null }; // Default for legacy/initial
+        }
+
+        return {
+            status: subscription.status,
+            currentPeriodEnd: subscription.currentPeriodEnd,
+        };
+    }
 }

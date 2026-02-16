@@ -13,6 +13,51 @@ export class PayPalController {
         private readonly registrationsService: RegistrationsService,
     ) { }
 
+    @Post('initialize-plans')
+    async initializePlans() {
+        this.logger.log('Initializing PayPal products and plans...');
+        try {
+            // 1. Create Product
+            const products = await this.paypalService.listProducts();
+            let product = products.products?.find((p: any) => p.name === 'ENTRAR');
+
+            if (!product) {
+                product = await this.paypalService.createProduct('ENTRAR', 'Servicios de Seguridad y Gestión Residencial');
+                this.logger.log(`Created new PayPal product: ${product.id}`);
+            } else {
+                this.logger.log(`Using existing PayPal product: ${product.id}`);
+            }
+
+            // 2. Create Plans
+            const tiers = [
+                { name: 'Starter', price: 49 },
+                { name: 'Premium', price: 129 },
+                { name: 'Elite', price: 299 },
+            ];
+
+            const createdPlans: any = {};
+            for (const tier of tiers) {
+                const plan = await this.paypalService.createPlan(
+                    product.id,
+                    `Plan ${tier.name}`,
+                    `Suscripción mensual al plan ${tier.name}`,
+                    tier.price
+                );
+                createdPlans[tier.name.toLowerCase()] = plan.id;
+                this.logger.log(`Created PayPal plan for ${tier.name}: ${plan.id}`);
+            }
+
+            return {
+                message: 'PayPal plans initialized successfully',
+                product_id: product.id,
+                plans: createdPlans
+            };
+        } catch (error: any) {
+            this.logger.error(`Failed to initialize PayPal plans: ${error.message}`);
+            throw error;
+        }
+    }
+
     @Post('webhook')
     @HttpCode(HttpStatus.OK)
     async handleWebhook(
@@ -42,17 +87,26 @@ export class PayPalController {
                 await this.handleOrderApproved(body);
                 break;
 
+            case 'BILLING.SUBSCRIPTION.ACTIVATED':
+                await this.handleSubscriptionActivated(body);
+                break;
+
+            case 'PAYMENT.SALE.COMPLETED':
+                await this.handlePaymentSaleCompleted(body);
+                break;
+
+            case 'BILLING.SUBSCRIPTION.CANCELLED':
+            case 'BILLING.SUBSCRIPTION.EXPIRED':
+            case 'BILLING.SUBSCRIPTION.SUSPENDED':
+                await this.handleSubscriptionIssue(body);
+                break;
+
             case 'PAYMENT.CAPTURE.COMPLETED':
                 this.logger.log(`Payment captured: ${JSON.stringify({
                     captureId: body.resource?.id,
                     orderId: body.resource?.supplementary_data?.related_ids?.order_id,
                     amount: body.resource?.amount,
                 })}`);
-                break;
-
-            case 'PAYMENT.CAPTURE.DENIED':
-            case 'PAYMENT.CAPTURE.REFUNDED':
-                this.logger.warn(`Payment issue: ${eventType} - ${body.resource?.id}`);
                 break;
 
             default:
@@ -69,34 +123,45 @@ export class PayPalController {
      * Idempotent: if the registration was already processed, it logs and skips.
      */
     private async handleOrderApproved(body: any) {
+        // ... (existing code for backward compatibility)
         const orderId = body.resource?.id;
-        if (!orderId) {
-            this.logger.error('CHECKOUT.ORDER.APPROVED: missing order ID');
-            return;
-        }
-
-        this.logger.log(`Order approved via webhook: ${orderId}`);
-
+        if (!orderId) return;
         try {
-            // Find the pending registration by PayPal order ID
             const registration = await this.registrationsService.findByPaypalOrderId(orderId);
-
-            if (!registration) {
-                this.logger.warn(`No pending registration found for PayPal order: ${orderId}`);
-                return;
-            }
-
-            // Skip if already processed (idempotent)
-            if (registration.status !== 'PENDING') {
-                this.logger.log(`Registration ${registration.id} already processed (status: ${registration.status}), skipping webhook`);
-                return;
-            }
-
-            // Trigger the full confirmation flow
-            const result = await this.registrationsService.confirmPayment(registration.id, orderId);
-            this.logger.log(`Webhook successfully processed registration ${registration.id}: ${JSON.stringify(result)}`);
+            if (!registration || registration.status !== 'PENDING') return;
+            await this.registrationsService.confirmPayment(registration.id, orderId);
         } catch (err) {
             this.logger.error(`Webhook processing failed for order ${orderId}: ${err.message}`);
         }
+    }
+
+    private async handleSubscriptionActivated(body: any) {
+        const subscriptionId = body.resource?.id;
+        const customId = body.resource?.custom_id; // Registration ID
+        if (!subscriptionId || !customId) return;
+
+        this.logger.log(`Subscription activated via webhook: ${subscriptionId} for registration ${customId}`);
+
+        try {
+            await this.registrationsService.confirmPayment(customId, subscriptionId);
+        } catch (err) {
+            this.logger.error(`Webhook processing failed for subscription ${subscriptionId}: ${err.message}`);
+        }
+    }
+
+    private async handlePaymentSaleCompleted(body: any) {
+        const subscriptionId = body.resource?.billing_agreement_id;
+        if (!subscriptionId) return;
+
+        this.logger.log(`Payment sale completed for subscription: ${subscriptionId}`);
+        // Here we would extend the period end in the Subscription table
+        // For now, it will be handled when the next period start is detected
+    }
+
+    private async handleSubscriptionIssue(body: any) {
+        const subscriptionId = body.resource?.id;
+        const eventType = body.event_type;
+        this.logger.warn(`Subscription status issue: ${eventType} - ${subscriptionId}`);
+        // Logic to update Subscription status to PAST_DUE or CANCELLED in DB
     }
 }

@@ -1,4 +1,5 @@
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
@@ -23,6 +24,7 @@ import { BillingModule } from './billing/billing.module';
 import { PusherService } from './pusher.service';
 import { PusherController } from './pusher.controller';
 import { Request, Response, NextFunction } from 'express';
+import { SubscriptionGuard } from './auth/guards/subscription.guard';
 
 @Module({
     imports: [
@@ -54,7 +56,13 @@ import { Request, Response, NextFunction } from 'express';
         BillingModule,
     ],
     controllers: [AppController, PusherController],
-    providers: [AppService],
+    providers: [
+        AppService,
+        {
+            provide: APP_GUARD,
+            useClass: SubscriptionGuard,
+        },
+    ],
 })
 export class AppModule {
     configure(consumer: MiddlewareConsumer) {

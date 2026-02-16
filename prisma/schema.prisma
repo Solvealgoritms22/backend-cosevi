@@ -275,6 +275,7 @@ model PendingRegistration {
   plan             String   @default("starter")
   logoUrl          String?
   paypalOrderId    String?  @unique
+  paypalSubscriptionId String? @unique
   paymentLink      String?
   amount           Float    @default(0)
   status           RegistrationStatus @default(PENDING)

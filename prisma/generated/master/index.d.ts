@@ -18943,6 +18943,7 @@ export namespace Prisma {
     plan: string | null
     logoUrl: string | null
     paypalOrderId: string | null
+    paypalSubscriptionId: string | null
     paymentLink: string | null
     amount: number | null
     status: $Enums.RegistrationStatus | null
@@ -18961,6 +18962,7 @@ export namespace Prisma {
     plan: string | null
     logoUrl: string | null
     paypalOrderId: string | null
+    paypalSubscriptionId: string | null
     paymentLink: string | null
     amount: number | null
     status: $Enums.RegistrationStatus | null
@@ -18979,6 +18981,7 @@ export namespace Prisma {
     plan: number
     logoUrl: number
     paypalOrderId: number
+    paypalSubscriptionId: number
     paymentLink: number
     amount: number
     status: number
@@ -19007,6 +19010,7 @@ export namespace Prisma {
     plan?: true
     logoUrl?: true
     paypalOrderId?: true
+    paypalSubscriptionId?: true
     paymentLink?: true
     amount?: true
     status?: true
@@ -19025,6 +19029,7 @@ export namespace Prisma {
     plan?: true
     logoUrl?: true
     paypalOrderId?: true
+    paypalSubscriptionId?: true
     paymentLink?: true
     amount?: true
     status?: true
@@ -19043,6 +19048,7 @@ export namespace Prisma {
     plan?: true
     logoUrl?: true
     paypalOrderId?: true
+    paypalSubscriptionId?: true
     paymentLink?: true
     amount?: true
     status?: true
@@ -19148,6 +19154,7 @@ export namespace Prisma {
     plan: string
     logoUrl: string | null
     paypalOrderId: string | null
+    paypalSubscriptionId: string | null
     paymentLink: string | null
     amount: number
     status: $Enums.RegistrationStatus
@@ -19185,6 +19192,7 @@ export namespace Prisma {
     plan?: boolean
     logoUrl?: boolean
     paypalOrderId?: boolean
+    paypalSubscriptionId?: boolean
     paymentLink?: boolean
     amount?: boolean
     status?: boolean
@@ -19203,6 +19211,7 @@ export namespace Prisma {
     plan?: boolean
     logoUrl?: boolean
     paypalOrderId?: boolean
+    paypalSubscriptionId?: boolean
     paymentLink?: boolean
     amount?: boolean
     status?: boolean
@@ -19221,6 +19230,7 @@ export namespace Prisma {
     plan?: boolean
     logoUrl?: boolean
     paypalOrderId?: boolean
+    paypalSubscriptionId?: boolean
     paymentLink?: boolean
     amount?: boolean
     status?: boolean
@@ -19243,6 +19253,7 @@ export namespace Prisma {
       plan: string
       logoUrl: string | null
       paypalOrderId: string | null
+      paypalSubscriptionId: string | null
       paymentLink: string | null
       amount: number
       status: $Enums.RegistrationStatus
@@ -19651,6 +19662,7 @@ export namespace Prisma {
     readonly plan: FieldRef<"PendingRegistration", 'String'>
     readonly logoUrl: FieldRef<"PendingRegistration", 'String'>
     readonly paypalOrderId: FieldRef<"PendingRegistration", 'String'>
+    readonly paypalSubscriptionId: FieldRef<"PendingRegistration", 'String'>
     readonly paymentLink: FieldRef<"PendingRegistration", 'String'>
     readonly amount: FieldRef<"PendingRegistration", 'Float'>
     readonly status: FieldRef<"PendingRegistration", 'RegistrationStatus'>
@@ -24278,6 +24290,7 @@ export namespace Prisma {
     plan: 'plan',
     logoUrl: 'logoUrl',
     paypalOrderId: 'paypalOrderId',
+    paypalSubscriptionId: 'paypalSubscriptionId',
     paymentLink: 'paymentLink',
     amount: 'amount',
     status: 'status',
@@ -25759,6 +25772,7 @@ export namespace Prisma {
     plan?: StringFilter<"PendingRegistration"> | string
     logoUrl?: StringNullableFilter<"PendingRegistration"> | string | null
     paypalOrderId?: StringNullableFilter<"PendingRegistration"> | string | null
+    paypalSubscriptionId?: StringNullableFilter<"PendingRegistration"> | string | null
     paymentLink?: StringNullableFilter<"PendingRegistration"> | string | null
     amount?: FloatFilter<"PendingRegistration"> | number
     status?: EnumRegistrationStatusFilter<"PendingRegistration"> | $Enums.RegistrationStatus
@@ -25777,6 +25791,7 @@ export namespace Prisma {
     plan?: SortOrder
     logoUrl?: SortOrderInput | SortOrder
     paypalOrderId?: SortOrderInput | SortOrder
+    paypalSubscriptionId?: SortOrderInput | SortOrder
     paymentLink?: SortOrderInput | SortOrder
     amount?: SortOrder
     status?: SortOrder
@@ -25788,6 +25803,7 @@ export namespace Prisma {
   export type PendingRegistrationWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     paypalOrderId?: string
+    paypalSubscriptionId?: string
     AND?: PendingRegistrationWhereInput | PendingRegistrationWhereInput[]
     OR?: PendingRegistrationWhereInput[]
     NOT?: PendingRegistrationWhereInput | PendingRegistrationWhereInput[]
@@ -25804,7 +25820,7 @@ export namespace Prisma {
     expiresAt?: DateTimeFilter<"PendingRegistration"> | Date | string
     createdAt?: DateTimeFilter<"PendingRegistration"> | Date | string
     updatedAt?: DateTimeFilter<"PendingRegistration"> | Date | string
-  }, "id" | "paypalOrderId">
+  }, "id" | "paypalOrderId" | "paypalSubscriptionId">
 
   export type PendingRegistrationOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25816,6 +25832,7 @@ export namespace Prisma {
     plan?: SortOrder
     logoUrl?: SortOrderInput | SortOrder
     paypalOrderId?: SortOrderInput | SortOrder
+    paypalSubscriptionId?: SortOrderInput | SortOrder
     paymentLink?: SortOrderInput | SortOrder
     amount?: SortOrder
     status?: SortOrder
@@ -25842,6 +25859,7 @@ export namespace Prisma {
     plan?: StringWithAggregatesFilter<"PendingRegistration"> | string
     logoUrl?: StringNullableWithAggregatesFilter<"PendingRegistration"> | string | null
     paypalOrderId?: StringNullableWithAggregatesFilter<"PendingRegistration"> | string | null
+    paypalSubscriptionId?: StringNullableWithAggregatesFilter<"PendingRegistration"> | string | null
     paymentLink?: StringNullableWithAggregatesFilter<"PendingRegistration"> | string | null
     amount?: FloatWithAggregatesFilter<"PendingRegistration"> | number
     status?: EnumRegistrationStatusWithAggregatesFilter<"PendingRegistration"> | $Enums.RegistrationStatus
@@ -27480,6 +27498,7 @@ export namespace Prisma {
     plan?: string
     logoUrl?: string | null
     paypalOrderId?: string | null
+    paypalSubscriptionId?: string | null
     paymentLink?: string | null
     amount?: number
     status?: $Enums.RegistrationStatus
@@ -27498,6 +27517,7 @@ export namespace Prisma {
     plan?: string
     logoUrl?: string | null
     paypalOrderId?: string | null
+    paypalSubscriptionId?: string | null
     paymentLink?: string | null
     amount?: number
     status?: $Enums.RegistrationStatus
@@ -27516,6 +27536,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paypalOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    paypalSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     paymentLink?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     status?: EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
@@ -27534,6 +27555,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paypalOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    paypalSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     paymentLink?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     status?: EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
@@ -27552,6 +27574,7 @@ export namespace Prisma {
     plan?: string
     logoUrl?: string | null
     paypalOrderId?: string | null
+    paypalSubscriptionId?: string | null
     paymentLink?: string | null
     amount?: number
     status?: $Enums.RegistrationStatus
@@ -27570,6 +27593,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paypalOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    paypalSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     paymentLink?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     status?: EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
@@ -27588,6 +27612,7 @@ export namespace Prisma {
     plan?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     paypalOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    paypalSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     paymentLink?: NullableStringFieldUpdateOperationsInput | string | null
     amount?: FloatFieldUpdateOperationsInput | number
     status?: EnumRegistrationStatusFieldUpdateOperationsInput | $Enums.RegistrationStatus
@@ -28957,6 +28982,7 @@ export namespace Prisma {
     plan?: SortOrder
     logoUrl?: SortOrder
     paypalOrderId?: SortOrder
+    paypalSubscriptionId?: SortOrder
     paymentLink?: SortOrder
     amount?: SortOrder
     status?: SortOrder
@@ -28979,6 +29005,7 @@ export namespace Prisma {
     plan?: SortOrder
     logoUrl?: SortOrder
     paypalOrderId?: SortOrder
+    paypalSubscriptionId?: SortOrder
     paymentLink?: SortOrder
     amount?: SortOrder
     status?: SortOrder
@@ -28997,6 +29024,7 @@ export namespace Prisma {
     plan?: SortOrder
     logoUrl?: SortOrder
     paypalOrderId?: SortOrder
+    paypalSubscriptionId?: SortOrder
     paymentLink?: SortOrder
     amount?: SortOrder
     status?: SortOrder
