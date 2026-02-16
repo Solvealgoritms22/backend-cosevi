@@ -25,6 +25,7 @@ export class RegistrationsController {
         registrationId: string;
         paypalToken: string;
     }) {
+        console.log(`[DEBUG] POST /confirm endpoint hit`, JSON.stringify(body));
         return this.registrationsService.confirmPayment(body.registrationId, body.paypalToken);
     }
 
