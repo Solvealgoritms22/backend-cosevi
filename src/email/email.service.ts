@@ -213,4 +213,46 @@ export class EmailService {
             throw error;
         }
     }
+
+    async sendPasswordResetEmail(to: string, name: string, token: string) {
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/reset-password?token=${token}`;
+
+        console.log(`Attempting to send password reset email to ${to}...`);
+        try {
+            const info = await this.transporter.sendMail({
+                from: `"ENTRA Soporte" <${process.env.EMAIL_USER}>`,
+                to,
+                subject: 'Restablecer Contraseña - ENTRA',
+                html: `
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
+                    <div style="background: #1e293b; padding: 32px; text-align: center;">
+                        <img src="${process.env.FRONTEND_URL || 'https://frontend-cosevi.vercel.app'}/logo-official.png" alt="ENTRA" style="height: 60px; margin-bottom: 8px;">
+                        <p style="color: #e0e7ff; margin: 4px 0 0; font-size: 14px; font-weight: 500; letter-spacing: 0.5px;">Recuperación de Cuenta</p>
+                    </div>
+                    <div style="padding: 32px;">
+                        <h2 style="color: #1e293b; margin: 0 0 16px;">Hola ${name},</h2>
+                        <p style="color: #475569; line-height: 1.6;">
+                            Recibimos una solicitud para restablecer tu contraseña. Si no fuiste tú, puedes ignorar este correo.
+                        </p>
+                        <div style="text-align: center; margin: 32px 0;">
+                            <a href="${resetLink}" style="background: #3b82f6; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">
+                                Restablecer Contraseña
+                            </a>
+                        </div>
+                        <p style="color: #94a3b8; font-size: 13px; text-align: center;">
+                            Este enlace expirará en 1 hora por seguridad.
+                        </p>
+                    </div>
+                    <div style="background: #1e293b; padding: 20px; text-align: center;">
+                        <p style="color: #94a3b8; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} ENTRAR. Todos los derechos reservados.</p>
+                    </div>
+                </div>
+            `,
+            });
+            console.log(`Password reset email sent to ${to}: ${info.messageId}`);
+        } catch (error) {
+            console.error(`Error sending password reset email to ${to}:`, error);
+            throw error;
+        }
+    }
 }

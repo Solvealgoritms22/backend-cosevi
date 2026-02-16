@@ -6,6 +6,9 @@ import { TenantsService } from '../tenants/tenants.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +17,7 @@ export class AuthService {
         private usersService: UsersService,
         private jwtService: JwtService,
         private tenantsService: TenantsService,
+        private emailService: EmailService,
     ) { }
 
     async validateUser(email: string, pass: string): Promise<any> {
@@ -214,5 +218,40 @@ export class AuthService {
         }
 
         return user;
+    }
+
+    async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+        const user = await this.prisma.user.findUnique({ where: { email: forgotPasswordDto.email } });
+        if (!user) {
+            // Return success even if user not found to prevent enumeration
+            return { message: 'If an account exists, a reset link has been sent.' };
+        }
+
+        const payload = { sub: user.id, email: user.email, type: 'reset' };
+        const token = this.jwtService.sign(payload, { expiresIn: '1h' });
+
+        await this.emailService.sendPasswordResetEmail(user.email, user.name || 'Usuario', token);
+        return { message: 'If an account exists, a reset link has been sent.' };
+    }
+
+    async resetPassword(resetPasswordDto: ResetPasswordDto) {
+        try {
+            const payload = this.jwtService.verify(resetPasswordDto.token);
+            if (payload.type !== 'reset') {
+                throw new BadRequestException('Invalid token type');
+            }
+
+            const salt = await bcrypt.genSalt();
+            const hashedPassword = await bcrypt.hash(resetPasswordDto.newPassword, salt);
+
+            await this.prisma.user.update({
+                where: { id: payload.sub },
+                data: { password: hashedPassword },
+            });
+
+            return { message: 'Password has been successfully updated.' };
+        } catch (error) {
+            throw new BadRequestException('Invalid or expired token');
+        }
     }
 }
