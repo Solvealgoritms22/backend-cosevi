@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import sharp from 'sharp';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UploadsService {
@@ -46,24 +47,29 @@ export class UploadsService {
             throw new BadRequestException('Only image files are allowed!');
         }
 
-        const { v4: uuidv4 } = await import('uuid');
-        const filename = `${uuidv4()}.jpg`;
+        const filename = `${randomUUID()}.jpg`;
         const filepath = path.join(this.uploadDir, filename);
 
         try {
-            await sharp(file.buffer)
-                .resize(500, 500, { // Resize to standard profile dimension
-                    fit: 'cover',
-                    position: 'center'
-                })
-                .jpeg({ quality: 90 }) // Convert to JPEG with high quality
-                .toFile(filepath);
+            try {
+                await sharp(file.buffer)
+                    .resize(500, 500, { // Resize to standard profile dimension
+                        fit: 'cover',
+                        position: 'center'
+                    })
+                    .jpeg({ quality: 90 }) // Convert to JPEG with high quality
+                    .toFile(filepath);
+            } catch (sharpError) {
+                console.warn('Sharp processing failed, falling back to raw save:', sharpError);
+                // Fallback: save raw buffer if sharp fails (e.g., in some serverless environments)
+                fs.writeFileSync(filepath, file.buffer);
+            }
 
             // Return relative URL that will be served by ServeStaticModule
             return `/uploads/profile-images/${filename}`;
         } catch (error) {
-            console.error('Image processing error:', error);
-            throw new BadRequestException('Failed to process image');
+            console.error('Image upload error:', error);
+            throw new BadRequestException('Failed to upload image');
         }
     }
 
@@ -76,23 +82,27 @@ export class UploadsService {
             throw new BadRequestException('Only image files are allowed!');
         }
 
-        const { v4: uuidv4 } = await import('uuid');
-        const filename = `${uuidv4()}.png`;
+        const filename = `${randomUUID()}.png`;
         const filepath = path.join(this.logoDir, filename);
 
         try {
-            await sharp(file.buffer)
-                .resize(400, 200, {
-                    fit: 'inside',
-                    withoutEnlargement: true,
-                })
-                .png({ quality: 95 })
-                .toFile(filepath);
+            try {
+                await sharp(file.buffer)
+                    .resize(400, 200, {
+                        fit: 'inside',
+                        withoutEnlargement: true,
+                    })
+                    .png({ quality: 95 })
+                    .toFile(filepath);
+            } catch (sharpError) {
+                console.warn('Sharp logo processing failed, falling back to raw save:', sharpError);
+                fs.writeFileSync(filepath, file.buffer);
+            }
 
             return `/uploads/logos/${filename}`;
         } catch (error) {
-            console.error('Logo processing error:', error);
-            throw new BadRequestException('Failed to process logo image');
+            console.error('Logo upload error:', error);
+            throw new BadRequestException('Failed to upload logo image');
         }
     }
 }
