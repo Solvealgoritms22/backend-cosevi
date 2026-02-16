@@ -107,6 +107,7 @@ export class PayPalService {
     async captureOrder(orderId: string): Promise<any> {
         const accessToken = await this.getAccessToken();
 
+        this.logger.log(`Attempting to capture PayPal order: ${orderId}`);
         const response = await fetch(`${this.baseUrl}/v2/checkout/orders/${orderId}/capture`, {
             method: 'POST',
             headers: {
@@ -115,13 +116,19 @@ export class PayPalService {
             },
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const error = await response.text();
-            this.logger.error(`PayPal capture failed: ${error}`);
+            // Handle specific case where order is already captured (e.g. by webhook)
+            if (response.status === 422 && data.details?.some((d: any) => d.issue === 'ORDER_ALREADY_CAPTURED')) {
+                this.logger.warn(`PayPal order ${orderId} was already captured. Fetching current status.`);
+                return this.getOrderDetails(orderId);
+            }
+
+            this.logger.error(`PayPal capture failed: ${JSON.stringify(data)}`);
             throw new Error(`PayPal capture failed: ${response.status}`);
         }
 
-        const data = await response.json();
         this.logger.log(`PayPal order captured: ${orderId}, status: ${data.status}`);
         return data;
     }

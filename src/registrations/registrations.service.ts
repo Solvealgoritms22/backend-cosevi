@@ -1,5 +1,5 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaClient as MasterClient } from '../../prisma/generated/master';
+import { PrismaClient } from '@prisma/client';
 import { PayPalService } from '../paypal/paypal.service';
 import { EmailService } from '../email/email.service';
 import { TenantsService } from '../tenants/tenants.service';
@@ -16,14 +16,14 @@ const LINK_EXPIRY_HOURS = 24;
 @Injectable()
 export class RegistrationsService {
     private readonly logger = new Logger(RegistrationsService.name);
-    private masterClient: MasterClient;
+    private masterClient: PrismaClient;
 
     constructor(
         private paypalService: PayPalService,
         private emailService: EmailService,
         private tenantsService: TenantsService,
     ) {
-        this.masterClient = new MasterClient({
+        this.masterClient = new PrismaClient({
             datasources: { db: { url: process.env.MASTER_DATABASE_URL } },
         });
     }
@@ -144,19 +144,37 @@ export class RegistrationsService {
     }
 
     async confirmPayment(registrationId: string, paypalToken: string) {
+        this.logger.log(`Confirming payment for registration: ${registrationId}`);
+
         const pending = await this.masterClient.pendingRegistration.findUnique({
             where: { id: registrationId },
         });
 
         if (!pending) {
+            this.logger.error(`Registration not found: ${registrationId}`);
             throw new NotFoundException('Registro no encontrado.');
         }
 
+        // --- IDEMPOTENCY CHECK ---
+        if (pending.status === 'PAID') {
+            this.logger.log(`Registration ${registrationId} is already marked as PAID. Checking if tenant exists.`);
+            const tenant = await this.masterClient.tenant.findFirst({
+                where: { adminEmail: pending.email }
+            });
+            return {
+                success: true,
+                tenantId: tenant?.id,
+                message: '¡Tu cuenta ya ha sido activada!',
+            };
+        }
+
         if (pending.status !== 'PENDING') {
-            throw new BadRequestException(`Este registro ya fue procesado (estado: ${pending.status}).`);
+            this.logger.warn(`Invalid registration status for confirmation: ${pending.status}`);
+            throw new BadRequestException(`Este registro no se puede procesar (estado: ${pending.status}).`);
         }
 
         if (new Date() > pending.expiresAt) {
+            this.logger.warn(`Registration link expired for ${registrationId}`);
             await this.masterClient.pendingRegistration.update({
                 where: { id: pending.id },
                 data: { status: 'EXPIRED' },
@@ -164,108 +182,142 @@ export class RegistrationsService {
             throw new BadRequestException('El enlace de pago ha expirado. Por favor, registra tu cuenta nuevamente.');
         }
 
-        // Capture the PayPal payment
+        // --- PAYPAL CAPTURE ---
         let captureResult: any;
         try {
+            this.logger.log(`Capturing order ${pending.paypalOrderId} for registration ${registrationId}`);
             captureResult = await this.paypalService.captureOrder(pending.paypalOrderId!);
         } catch (error) {
             this.logger.error(`Payment capture failed: ${error.message}`);
-            throw new BadRequestException('Error al procesar el pago. Contacta a soporte.');
+            throw new BadRequestException('Error al procesar el pago con PayPal. Verifica tu cuenta o intenta más tarde.');
         }
 
-        if (captureResult.status !== 'COMPLETED') {
-            throw new BadRequestException(`Pago no completado. Estado: ${captureResult.status}`);
+        if (captureResult.status !== 'COMPLETED' && captureResult.status !== 'APPROVED') {
+            this.logger.error(`PayPal order status is not valid for activation: ${captureResult.status}`);
+            throw new BadRequestException(`El pago no ha sido completado aún (Estado: ${captureResult.status}).`);
         }
 
-        // Mark registration as paid
+        // --- FINALIZATION ---
+        this.logger.log(`Finalizing account creation for ${pending.email}`);
+
+        // Update status immediately (atomic-ish)
         await this.masterClient.pendingRegistration.update({
             where: { id: pending.id },
             data: { status: 'PAID' },
         });
 
-        // Create tenant
-        const subdomain = pending.organizationName.toLowerCase().replace(/[^a-z0-9]/g, '');
-        const tenant = await this.tenantsService.createTenant({
-            name: pending.organizationName,
-            subdomain: `${subdomain}-${Math.random().toString(36).substring(7)}`,
-            dbUrl: process.env.DATABASE_URL || 'file:./dev.db',
-            plan: pending.plan,
-            adminEmail: pending.email,
-            location: pending.location || undefined,
-            logoUrl: pending.logoUrl || undefined,
+        // 1. Create/Find Tenant
+        let tenant = await this.masterClient.tenant.findUnique({
+            where: { adminEmail: pending.email }
         });
 
-        this.logger.log(`Tenant created: ${tenant.id} for ${pending.organizationName}`);
+        if (!tenant) {
+            const subdomain = pending.organizationName.toLowerCase().replace(/[^a-z0-9]/g, '');
+            tenant = await this.tenantsService.createTenant({
+                name: pending.organizationName,
+                subdomain: `${subdomain}-${Math.random().toString(36).substring(7)}`,
+                dbUrl: process.env.DATABASE_URL || 'file:./dev.db',
+                plan: pending.plan,
+                adminEmail: pending.email,
+                location: pending.location || undefined,
+                logoUrl: pending.logoUrl || undefined,
+            });
+            this.logger.log(`Tenant created: ${tenant.id} for ${pending.organizationName}`);
+        }
 
-        // Create subscription record
+        // 2. Create Subscription
         const now = new Date();
         const periodEnd = new Date(now);
         periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-        await this.masterClient.subscription.create({
-            data: {
-                tenantId: tenant.id,
-                plan: pending.plan,
-                amount: pending.amount,
-                status: 'ACTIVE',
-                currentPeriodStart: now,
-                currentPeriodEnd: periodEnd,
-            },
+        const existingSub = await this.masterClient.subscription.findFirst({
+            where: { tenantId: tenant.id }
         });
 
-        // Create initial invoice
-        const paypalPaymentId = captureResult.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+        if (!existingSub) {
+            await this.masterClient.subscription.create({
+                data: {
+                    tenantId: tenant.id,
+                    plan: pending.plan,
+                    amount: pending.amount,
+                    status: 'ACTIVE',
+                    currentPeriodStart: now,
+                    currentPeriodEnd: periodEnd,
+                },
+            });
+        }
 
-        await this.masterClient.invoice.create({
-            data: {
-                tenantId: tenant.id,
-                amount: pending.amount,
-                overageAmount: 0,
-                totalAmount: pending.amount,
-                status: 'PAID',
-                paypalPaymentId,
-                billingPeriodStart: now,
-                billingPeriodEnd: periodEnd,
-                details: { type: 'initial_payment', plan: pending.plan },
-            },
+        // 3. Create Invoice
+        const paypalPaymentId = captureResult.purchase_units?.[0]?.payments?.captures?.[0]?.id || 'MANUAL-CONFIRM';
+        const existingInvoice = await this.masterClient.invoice.findFirst({
+            where: { tenantId: tenant.id, totalAmount: pending.amount }
         });
 
-        // Create the admin user using PrismaService approach
-        // We need to use the tenant's DB directly
-        const { PrismaClient } = require('@prisma/client');
+        if (!existingInvoice) {
+            await this.masterClient.invoice.create({
+                data: {
+                    tenantId: tenant.id,
+                    amount: pending.amount,
+                    overageAmount: 0,
+                    totalAmount: pending.amount,
+                    status: 'PAID',
+                    paypalPaymentId,
+                    billingPeriodStart: now,
+                    billingPeriodEnd: periodEnd,
+                    details: { type: 'initial_payment', plan: pending.plan },
+                },
+            });
+        }
+
+        // 4. Create Admin User in Tenant Database
+        this.logger.log(`Initializing tenant database connection for ${tenant.id}`);
+        // Use the default generator but with a specific URL
         const tenantDb = new PrismaClient({
             datasources: { db: { url: tenant.dbUrl } },
         });
 
         try {
             await tenantDb.$connect();
-            const user = await tenantDb.user.create({
-                data: {
-                    email: pending.email,
-                    password: pending.passwordHash,
-                    name: pending.name,
-                    role: 'ADMIN',
-                },
+            const existingUser = await tenantDb.user.findUnique({
+                where: { email: pending.email }
             });
-            this.logger.log(`Admin user created: ${user.id} in tenant ${tenant.id}`);
 
-            // 6. Sync to Global User Map for Discovery
-            try {
-                await this.tenantsService.upsertGlobalUser({
-                    email: pending.email,
-                    tenantId: tenant.id,
-                    role: 'ADMIN'
+            if (!existingUser) {
+                const user = await tenantDb.user.create({
+                    data: {
+                        email: pending.email,
+                        password: pending.passwordHash,
+                        name: pending.name,
+                        role: 'ADMIN',
+                    },
                 });
-                this.logger.log(`Admin user ${pending.email} registered in GlobalUserMap`);
-            } catch (error) {
-                this.logger.error(`Failed to register ${pending.email} in GlobalUserMap: ${error.message}`);
+                this.logger.log(`Admin user created: ${user.id} in tenant ${tenant.id}`);
+
+                // Sync to Global User Map
+                try {
+                    await this.tenantsService.upsertGlobalUser({
+                        email: pending.email,
+                        tenantId: tenant.id,
+                        role: 'ADMIN'
+                    });
+                    this.logger.log(`Admin user ${pending.email} registered in GlobalUserMap`);
+                } catch (error) {
+                    this.logger.error(`Failed to register ${pending.email} in GlobalUserMap: ${error.message}`);
+                }
             }
+        } catch (dbError) {
+            this.logger.error(`Error during tenant DB initialization: ${dbError.message}`);
         } finally {
             await tenantDb.$disconnect();
         }
 
-        // Send welcome email
-        await this.emailService.sendWelcome(pending.email, pending.name, pending.plan);
+        // 5. Send welcome email
+        try {
+            await this.emailService.sendWelcome(pending.email, pending.name, pending.plan);
+            this.logger.log(`Welcome email sent to ${pending.email}`);
+        } catch (emailError) {
+            this.logger.error(`Failed to send welcome email: ${emailError.message}`);
+        }
 
         return {
             success: true,
