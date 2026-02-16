@@ -221,9 +221,9 @@ export class EmailService {
         console.log(`Attempting to send password reset email to ${to}...`);
         try {
             const info = await this.transporter.sendMail({
-                from: `"ENTRA Soporte" <${process.env.EMAIL_USER}>`,
+                from: `"ENTRAR Soporte" <${process.env.EMAIL_USER}>`,
                 to,
-                subject: 'Restablecer Contraseña - ENTRA',
+                subject: 'Restablecer Contraseña - ENTRAR',
                 html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
                     <div style="background: #1e293b; padding: 32px; text-align: center;">
