@@ -1,4 +1,4 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Injectable, Logger, Inject, BadRequestException } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaClient as MasterClient } from '../../prisma/generated/master';
@@ -257,6 +257,24 @@ export class BillingService {
             throw new Error('No active PayPal subscription found');
         }
 
+        // 1. Check for pending or urgent invoices
+        const pendingInvoices = await this.masterClient.invoice.findFirst({
+            where: {
+                tenantId,
+                status: { in: ['PENDING', 'URGENTE'] as any }
+            }
+        });
+
+        if (pendingInvoices) {
+            throw new BadRequestException('CANCELLATION_BLOCKED_PENDING_DEBT');
+        }
+
+        // 2. Check for current period overages
+        const currentUsage = await this.getCurrentUsage();
+        if (currentUsage && currentUsage.totalOverage > 0) {
+            throw new BadRequestException('CANCELLATION_BLOCKED_OVERAGES');
+        }
+
         try {
             await this.paypalService.cancelSubscription(
                 subscription.paypalSubscriptionId,
@@ -272,6 +290,63 @@ export class BillingService {
             return { success: true };
         } catch (error) {
             this.logger.error(`Failed to cancel subscription for tenant ${tenantId}: ${error.message}`);
+            throw error;
+        }
+    }
+
+    async upgradeSubscription(newPlan: string) {
+        const tenantId = this.getTenantId();
+        if (!tenantId) throw new Error('Tenant ID not found');
+
+        const subscription = await this.masterClient.subscription.findFirst({
+            where: { tenantId, status: 'ACTIVE' },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        if (!subscription || !subscription.paypalSubscriptionId) {
+            throw new Error('No active PayPal subscription found');
+        }
+
+        const currentPlan = subscription.plan.toLowerCase();
+        const targetPlan = newPlan.toLowerCase();
+
+        // Validate plan sequence (only allow moving to a higher plan or different one)
+        const planOrder = ['starter', 'premium', 'elite'];
+        const currentIndex = planOrder.indexOf(currentPlan);
+        const targetIndex = planOrder.indexOf(targetPlan);
+
+        if (targetIndex === -1) {
+            throw new BadRequestException('Invalid target plan');
+        }
+
+        if (targetIndex <= currentIndex) {
+            throw new BadRequestException('You can only upgrade to a higher tier plan');
+        }
+
+        const paypalPlanId = process.env[`PAYPAL_${targetPlan.toUpperCase()}_PLAN_ID`];
+        if (!paypalPlanId) {
+            throw new Error(`PayPal Plan ID not configured for tier: ${targetPlan}`);
+        }
+
+        try {
+            const revision = await this.paypalService.reviseSubscription(
+                subscription.paypalSubscriptionId,
+                paypalPlanId
+            );
+
+            const approvalUrl = revision.links?.find((l: any) => l.rel === 'approve')?.href;
+
+            // Optional: Optimistic update or wait for webhook
+            // For now, if no approval is needed, we might need to update the DB
+            // But usually PayPal requires approval for price changes
+
+            return {
+                success: true,
+                approvalUrl,
+                status: revision.status
+            };
+        } catch (error) {
+            this.logger.error(`Failed to upgrade subscription for tenant ${tenantId}: ${error.message}`);
             throw error;
         }
     }

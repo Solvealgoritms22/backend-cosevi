@@ -208,6 +208,30 @@ export class PayPalService {
         return response.json();
     }
 
+    async reviseSubscription(subscriptionId: string, planId: string): Promise<any> {
+        const accessToken = await this.getAccessToken();
+
+        this.logger.log(`Attempting to revise PayPal subscription: ${subscriptionId} to plan ${planId}`);
+        const response = await fetch(`${this.baseUrl}/v1/billing/subscriptions/${subscriptionId}/revise`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                plan_id: planId,
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            this.logger.error(`PayPal revise subscription failed: ${error}`);
+            throw new Error(`PayPal revise subscription failed: ${response.status}`);
+        }
+
+        return response.json();
+    }
+
     async cancelSubscription(subscriptionId: string, reason: string): Promise<void> {
         const accessToken = await this.getAccessToken();
 

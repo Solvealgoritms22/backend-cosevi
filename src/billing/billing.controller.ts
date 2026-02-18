@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, UseGuards, Post, Body } from '@nestjs/common';
 import { BillingService } from './billing.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -25,5 +25,10 @@ export class BillingController {
     @Patch('cancel-subscription')
     cancelSubscription() {
         return this.billingService.cancelSubscription();
+    }
+
+    @Post('upgrade-subscription')
+    upgradeSubscription(@Body('plan') plan: string) {
+        return this.billingService.upgradeSubscription(plan);
     }
 }
