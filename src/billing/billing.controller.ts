@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { BillingService } from './billing.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -20,5 +20,10 @@ export class BillingController {
     @Get('invoices')
     getInvoices() {
         return this.billingService.getInvoices();
+    }
+
+    @Patch('cancel-subscription')
+    cancelSubscription() {
+        return this.billingService.cancelSubscription();
     }
 }

@@ -364,4 +364,16 @@ export class RegistrationsService {
             where: { paypalOrderId },
         });
     }
+
+    async updateSubscriptionStatus(paypalSubscriptionId: string, status: string) {
+        this.logger.log(`Updating subscription status via webhook: ${paypalSubscriptionId} -> ${status}`);
+        try {
+            await this.masterClient.subscription.updateMany({
+                where: { paypalSubscriptionId },
+                data: { status: status.toUpperCase() as any },
+            });
+        } catch (error) {
+            this.logger.error(`Failed to update subscription status for ${paypalSubscriptionId}: ${error.message}`);
+        }
+    }
 }

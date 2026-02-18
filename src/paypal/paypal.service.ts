@@ -208,6 +208,30 @@ export class PayPalService {
         return response.json();
     }
 
+    async cancelSubscription(subscriptionId: string, reason: string): Promise<void> {
+        const accessToken = await this.getAccessToken();
+
+        this.logger.log(`Attempting to cancel PayPal subscription: ${subscriptionId}`);
+        const response = await fetch(`${this.baseUrl}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reason: reason || 'Customer requested cancellation',
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            this.logger.error(`PayPal cancel subscription failed: ${error}`);
+            throw new Error(`PayPal cancel subscription failed: ${response.status}`);
+        }
+
+        this.logger.log(`PayPal subscription cancelled: ${subscriptionId}`);
+    }
+
     async verifyWebhookSignature(
         headers: Record<string, string>,
         body: string,

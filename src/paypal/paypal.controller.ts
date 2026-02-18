@@ -162,6 +162,11 @@ export class PayPalController {
         const subscriptionId = body.resource?.id;
         const eventType = body.event_type;
         this.logger.warn(`Subscription status issue: ${eventType} - ${subscriptionId}`);
-        // Logic to update Subscription status to PAST_DUE or CANCELLED in DB
+
+        let status = 'CANCELLED';
+        if (eventType.includes('SUSPENDED')) status = 'PAUSED';
+        if (eventType.includes('EXPIRED')) status = 'PAST_DUE';
+
+        await this.registrationsService.updateSubscriptionStatus(subscriptionId, status);
     }
 }

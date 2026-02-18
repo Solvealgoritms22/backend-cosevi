@@ -5,6 +5,7 @@ import { PrismaClient as MasterClient } from '../../prisma/generated/master';
 import { PrismaService } from '../prisma.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { PLAN_LIMITS } from '../auth/guards/plan.guard';
+import { PayPalService } from '../paypal/paypal.service';
 
 const PLAN_PRICES: Record<string, number> = {
     starter: 49,
@@ -30,6 +31,7 @@ export class BillingService {
     constructor(
         private prisma: PrismaService,
         private tenantsService: TenantsService,
+        private paypalService: PayPalService,
         @Inject(REQUEST) private request: Request,
     ) {
         this.masterClient = new MasterClient({
@@ -239,6 +241,38 @@ export class BillingService {
             };
         } finally {
             await tenantDb.$disconnect();
+        }
+    }
+
+    async cancelSubscription() {
+        const tenantId = this.getTenantId();
+        if (!tenantId) throw new Error('Tenant ID not found');
+
+        const subscription = await this.masterClient.subscription.findFirst({
+            where: { tenantId, status: 'ACTIVE' },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        if (!subscription || !subscription.paypalSubscriptionId) {
+            throw new Error('No active PayPal subscription found');
+        }
+
+        try {
+            await this.paypalService.cancelSubscription(
+                subscription.paypalSubscriptionId,
+                'Cancelled by user from dashboard'
+            );
+
+            // Update local DB status
+            await this.masterClient.subscription.update({
+                where: { id: subscription.id },
+                data: { status: 'CANCELLED' },
+            });
+
+            return { success: true };
+        } catch (error) {
+            this.logger.error(`Failed to cancel subscription for tenant ${tenantId}: ${error.message}`);
+            throw error;
         }
     }
 }
