@@ -30,4 +30,16 @@ export class UploadsController {
         const url = await this.uploadsService.processAndSaveLogo(file);
         return { url };
     }
+
+    @Post('visit-attachment')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: memoryStorage(),
+        limits: {
+            fileSize: 10 * 1024 * 1024, // 10MB for visit photos
+        },
+    }))
+    async uploadVisitAttachment(@UploadedFile() file: Express.Multer.File) {
+        const url = await this.uploadsService.processAndSaveVisitImage(file);
+        return { url };
+    }
 }

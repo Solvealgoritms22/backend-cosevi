@@ -302,11 +302,35 @@ export class UsersService {
     }
 
     async remove(id: string) {
+        const requester = (this.request as any).user;
+        if (requester && requester.userId === id) {
+            throw new BadRequestException('You cannot delete your own account.');
+        }
+
         return this.prisma.$transaction(async (tx) => {
             const user = await tx.user.findUnique({
                 where: { id },
-                select: { profileImage: true, residentProfile: true },
+                select: { email: true, role: true, profileImage: true, residentProfile: true },
             });
+
+            if (!user) throw new BadRequestException('User not found');
+
+            // Protect Primary Admin (subscriber)
+            const tenantId = this.request.headers['x-tenant-id'] as string;
+            if (tenantId) {
+                const tenant = await this.tenantsService.getTenantById(tenantId);
+                if (tenant && tenant.adminEmail === user.email) {
+                    throw new BadRequestException('The Primary Administrator (subscriber) cannot be deleted.');
+                }
+            }
+
+            // Protect last administrator
+            if (user.role === 'ADMIN') {
+                const adminCount = await tx.user.count({ where: { role: 'ADMIN' } });
+                if (adminCount <= 1) {
+                    throw new BadRequestException('The last administrator account cannot be deleted.');
+                }
+            }
 
             await tx.notification.deleteMany({ where: { userId: id } });
             await tx.incidentReport.deleteMany({ where: { reporterId: id } });
@@ -355,7 +379,6 @@ export class UsersService {
                 console.error(`[UsersService] Failed to remove ${deleted.email} from GlobalUserMap:`, error);
             }
 
-            const tenantId = this.request.headers['x-tenant-id'] as string;
             // Emit outside transaction to avoid blocking, but inside async scope
             this.gateway.emitStatusUpdate({ type: 'USER_DELETED', userId: id }, tenantId);
             return deleted;

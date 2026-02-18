@@ -29,7 +29,7 @@ import { SubscriptionGuard } from './auth/guards/subscription.guard';
 @Module({
     imports: [
         ServeStaticModule.forRoot({
-            rootPath: join(process.cwd(), 'uploads'),
+            rootPath: process.env.VERCEL ? '/tmp/uploads' : join(process.cwd(), 'uploads'),
             serveRoot: '/uploads',
         }),
         ServeStaticModule.forRoot({
