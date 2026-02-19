@@ -160,6 +160,16 @@ export class BillingService {
             return null;
         }
 
+        // Diagnostic: check status in PayPal if ID exists
+        if (subscription.paypalSubscriptionId) {
+            try {
+                const paypalDetails = await this.paypalService.getSubscriptionDetails(subscription.paypalSubscriptionId);
+                this.logger.log(`Subscription ${subscription.id} status in PayPal: ${paypalDetails.status}`);
+            } catch (err) {
+                this.logger.error(`Failed to fetch PayPal status for ${subscription.paypalSubscriptionId}: ${err.message}`);
+            }
+        }
+
         return {
             id: subscription.id,
             plan: subscription.plan,
