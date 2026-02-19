@@ -223,13 +223,14 @@ export class PayPalService {
             }),
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const error = await response.text();
-            this.logger.error(`PayPal revise subscription failed: ${error}`);
+            this.logger.error(`PayPal revise subscription failed for ${subscriptionId}: ${response.status} - ${JSON.stringify(data)}`);
             throw new Error(`PayPal revise subscription failed: ${response.status}`);
         }
 
-        return response.json();
+        return data;
     }
 
     async cancelSubscription(subscriptionId: string, reason: string): Promise<void> {
@@ -249,7 +250,7 @@ export class PayPalService {
 
         if (!response.ok) {
             const error = await response.text();
-            this.logger.error(`PayPal cancel subscription failed: ${error}`);
+            this.logger.error(`PayPal cancel subscription failed for ${subscriptionId}: ${response.status} - ${error}`);
             throw new Error(`PayPal cancel subscription failed: ${response.status}`);
         }
 

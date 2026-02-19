@@ -1,4 +1,4 @@
-import { Injectable, Logger, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, Inject, BadRequestException, NotFoundException } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaClient as MasterClient } from '../../prisma/generated/master';
@@ -23,21 +23,22 @@ const OVERAGE_RATES: Record<string, number> = {
     reports: 1.00,
 };
 
+// Use a shared client to avoid connection leaks in request-scoped service
+const masterClient = new MasterClient({
+    datasources: { db: { url: process.env.MASTER_DATABASE_URL } },
+});
+
 @Injectable()
 export class BillingService {
     private readonly logger = new Logger(BillingService.name);
-    private masterClient: MasterClient;
+    private masterClient = masterClient;
 
     constructor(
         private prisma: PrismaService,
         private tenantsService: TenantsService,
         private paypalService: PayPalService,
         @Inject(REQUEST) private request: Request,
-    ) {
-        this.masterClient = new MasterClient({
-            datasources: { db: { url: process.env.MASTER_DATABASE_URL } },
-        });
-    }
+    ) { }
 
     private getTenantId(): string {
         return this.request.headers['x-tenant-id'] as string;
@@ -246,7 +247,7 @@ export class BillingService {
 
     async cancelSubscription() {
         const tenantId = this.getTenantId();
-        if (!tenantId) throw new Error('Tenant ID not found');
+        if (!tenantId) throw new BadRequestException('Tenant ID not found');
 
         const subscription = await this.masterClient.subscription.findFirst({
             where: { tenantId, status: 'ACTIVE' },
@@ -254,7 +255,7 @@ export class BillingService {
         });
 
         if (!subscription || !subscription.paypalSubscriptionId) {
-            throw new Error('No active PayPal subscription found');
+            throw new NotFoundException('No active PayPal subscription found');
         }
 
         // 1. Check for pending or urgent invoices
@@ -296,7 +297,7 @@ export class BillingService {
 
     async upgradeSubscription(newPlan: string) {
         const tenantId = this.getTenantId();
-        if (!tenantId) throw new Error('Tenant ID not found');
+        if (!tenantId) throw new BadRequestException('Tenant ID not found');
 
         const subscription = await this.masterClient.subscription.findFirst({
             where: { tenantId, status: 'ACTIVE' },
@@ -304,7 +305,7 @@ export class BillingService {
         });
 
         if (!subscription || !subscription.paypalSubscriptionId) {
-            throw new Error('No active PayPal subscription found');
+            throw new NotFoundException('No active PayPal subscription found');
         }
 
         const currentPlan = subscription.plan.toLowerCase();
@@ -325,7 +326,8 @@ export class BillingService {
 
         const paypalPlanId = process.env[`PAYPAL_${targetPlan.toUpperCase()}_PLAN_ID`];
         if (!paypalPlanId) {
-            throw new Error(`PayPal Plan ID not configured for tier: ${targetPlan}`);
+            this.logger.error(`PayPal Plan ID not configured for tier: ${targetPlan}`);
+            throw new BadRequestException(`Plan configuration missing for ${targetPlan}`);
         }
 
         try {
