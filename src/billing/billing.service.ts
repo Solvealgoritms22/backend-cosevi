@@ -451,4 +451,31 @@ export class BillingService {
             throw error;
         }
     }
+
+    async finalizeReactivation(paypalSubscriptionId: string) {
+        const tenantId = this.getTenantId();
+        if (!tenantId) {
+            throw new BadRequestException('Organization context required');
+        }
+
+        this.logger.log(`Finalizing reactivation for tenant ${tenantId} and sub ${paypalSubscriptionId}`);
+
+        try {
+            // 1. Fetch details from PayPal to ensure it's ACTIVE and get the plan_id
+            const details = await this.paypalService.getSubscriptionDetails(paypalSubscriptionId);
+
+            if (details.status !== 'ACTIVE' && details.status !== 'APPROVED') {
+                this.logger.warn(`Subscription ${paypalSubscriptionId} is not in an active state: ${details.status}`);
+                return { success: false, status: details.status };
+            }
+
+            // 2. Use registrationsService to finalize the local DB update
+            await this.registrationsService.reactivateSubscription(tenantId, paypalSubscriptionId, details.plan_id);
+
+            return { success: true };
+        } catch (error) {
+            this.logger.error(`Failed to finalize reactivation for tenant ${tenantId}: ${error.message}`);
+            throw error;
+        }
+    }
 }

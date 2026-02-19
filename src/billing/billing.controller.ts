@@ -36,4 +36,9 @@ export class BillingController {
     reactivateSubscription(@Body('plan') plan: string) {
         return this.billingService.reactivateSubscription(plan);
     }
+
+    @Post('finalize-reactivation')
+    finalizeReactivation(@Body('paypalSubscriptionId') paypalSubscriptionId: string) {
+        return this.billingService.finalizeReactivation(paypalSubscriptionId);
+    }
 }
