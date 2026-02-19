@@ -27,9 +27,9 @@ export class BillingController {
         return this.billingService.cancelSubscription();
     }
 
-    @Post('upgrade-subscription')
-    upgradeSubscription(@Body('plan') plan: string) {
-        return this.billingService.upgradeSubscription(plan);
+    @Post('change-subscription')
+    changeSubscription(@Body('plan') plan: string) {
+        return this.billingService.changeSubscription(plan);
     }
 
     @Post('reactivate-subscription')

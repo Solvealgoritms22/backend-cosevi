@@ -335,9 +335,9 @@ export class BillingService {
         }
     }
 
-    async upgradeSubscription(newPlan: string) {
+    async changeSubscription(newPlan: string) {
         const tenantId = this.getTenantId();
-        this.logger.debug(`Upgrading subscription for tenant: ${tenantId}, target plan: ${newPlan}`);
+        this.logger.debug(`Changing subscription for tenant: ${tenantId}, target plan: ${newPlan}`);
 
         if (!tenantId) throw new BadRequestException('Tenant ID not found');
 
@@ -353,24 +353,23 @@ export class BillingService {
         }
 
         if (!subscription.paypalSubscriptionId) {
-            this.logger.warn(`Subscription ${subscription.id} found for tenant ${tenantId} but has no paypalSubscriptionId. Upgrade blocked.`);
+            this.logger.warn(`Subscription ${subscription.id} found for tenant ${tenantId} but has no paypalSubscriptionId. Change blocked.`);
             throw new BadRequestException('UPGRADE_BLOCKED_MANUAL_PLAN');
         }
 
         const currentPlan = subscription.plan.toLowerCase();
         const targetPlan = newPlan.toLowerCase();
 
-        // Validate plan sequence (only allow moving to a higher plan or different one)
+        if (currentPlan === targetPlan) {
+            throw new BadRequestException('Target plan is already active');
+        }
+
+        // Validate target plan exists
         const planOrder = ['starter', 'premium', 'elite'];
-        const currentIndex = planOrder.indexOf(currentPlan);
         const targetIndex = planOrder.indexOf(targetPlan);
 
         if (targetIndex === -1) {
             throw new BadRequestException('Invalid target plan');
-        }
-
-        if (targetIndex <= currentIndex) {
-            throw new BadRequestException('You can only upgrade to a higher tier plan');
         }
 
         const paypalPlanId = process.env[`PAYPAL_${targetPlan.toUpperCase()}_PLAN_ID`];
@@ -400,7 +399,7 @@ export class BillingService {
                 status: revision.status
             };
         } catch (error) {
-            this.logger.error(`Failed to upgrade subscription for tenant ${tenantId}: ${error.message}`);
+            this.logger.error(`Failed to change subscription for tenant ${tenantId}: ${error.message}`);
             throw error;
         }
     }
