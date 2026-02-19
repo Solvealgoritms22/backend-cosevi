@@ -71,6 +71,20 @@ export class RegistrationsService {
             );
         }
 
+        // Check if email already belongs to a registered user (GlobalUserMap or Tenant)
+        const existingGlobal = await this.masterClient.globalUserMap.findUnique({
+            where: { email: data.email },
+        });
+
+        const existingTenant = await this.masterClient.tenant.findUnique({
+            where: { adminEmail: data.email },
+        });
+
+        if (existingGlobal || existingTenant) {
+            this.logger.warn(`Email ${data.email} is already registered.`);
+            throw new BadRequestException('EMAIL_ALREADY_REGISTERED');
+        }
+
         // Hash password
         this.logger.log(`Hashing password for ${data.email}`);
         const passwordHash = await bcrypt.hash(data.password, 10);
