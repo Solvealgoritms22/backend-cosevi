@@ -404,4 +404,51 @@ export class BillingService {
             throw error;
         }
     }
+
+    async reactivateSubscription(plan: string) {
+        const tenantId = this.getTenantId();
+        if (!tenantId) {
+            throw new BadRequestException('Organization context required');
+        }
+
+        const targetPlan = plan.toLowerCase();
+        const paypalPlanId = process.env[`PAYPAL_${targetPlan.toUpperCase()}_PLAN_ID`];
+
+        if (!paypalPlanId) {
+            this.logger.error(`PayPal Plan ID not configured for tier: ${targetPlan}`);
+            throw new BadRequestException(`Plan configuration missing for ${targetPlan}`);
+        }
+
+        const customId = `TENANT:${tenantId}`;
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+        // We use a specific success URL to handle the reactivation callback on frontend
+        // Note: We don't have a 'registration' ID here, so we rely on the webhook
+        // or we successfuly redirect to billing page directly.
+        // We add a 'reactivated=true' query param to show a success message.
+        const returnUrl = `${frontendUrl}/billing?reactivated=true&plan=${targetPlan}`;
+        const cancelUrl = `${frontendUrl}/billing?cancelled=true`;
+
+        try {
+            this.logger.log(`Initiating subscription reactivation for tenant ${tenantId} on plan ${targetPlan}`);
+
+            const subscription = await this.paypalService.createSubscription(
+                paypalPlanId,
+                customId,
+                returnUrl,
+                cancelUrl
+            );
+
+            const approvalUrl = subscription.links?.find((l: any) => l.rel === 'approve')?.href;
+
+            return {
+                approvalUrl,
+                subscriptionId: subscription.id
+            };
+
+        } catch (error) {
+            this.logger.error(`Failed to initiate reactivation for tenant ${tenantId}: ${error.message}`);
+            throw error;
+        }
+    }
 }

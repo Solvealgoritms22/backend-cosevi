@@ -31,4 +31,9 @@ export class BillingController {
     upgradeSubscription(@Body('plan') plan: string) {
         return this.billingService.upgradeSubscription(plan);
     }
+
+    @Post('reactivate-subscription')
+    reactivateSubscription(@Body('plan') plan: string) {
+        return this.billingService.reactivateSubscription(plan);
+    }
 }

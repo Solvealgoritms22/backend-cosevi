@@ -146,10 +146,28 @@ export class PayPalController {
 
         this.logger.log(`Subscription activated via webhook: ${subscriptionId} for registration ${customId}`);
 
-        try {
-            await this.registrationsService.confirmPayment(customId, subscriptionId);
-        } catch (err) {
-            this.logger.error(`Webhook processing failed for subscription ${subscriptionId}: ${err.message}`);
+        if (customId.startsWith('TENANT:')) {
+            const tenantId = customId.split(':')[1];
+            this.logger.log(`Handling subscription activation for existing tenant: ${tenantId}`);
+            try {
+                // We need to fetch the plan ID from the subscription details because it might not be in the webhook resource top-level
+                // But usually resource.plan_id is present
+                const planId = body.resource?.plan_id;
+                if (planId) {
+                    await this.registrationsService.reactivateSubscription(tenantId, subscriptionId, planId);
+                } else {
+                    this.logger.warn(`Plan ID missing in webhook resource for tenant ${tenantId}`);
+                }
+            } catch (err) {
+                this.logger.error(`Failed to reactivate subscription for tenant ${tenantId}: ${err.message}`);
+            }
+        } else {
+            // Backward compatibility: customId is Registration ID
+            try {
+                await this.registrationsService.confirmPayment(customId, subscriptionId);
+            } catch (err) {
+                this.logger.error(`Webhook processing failed for registration ${customId}: ${err.message}`);
+            }
         }
     }
 

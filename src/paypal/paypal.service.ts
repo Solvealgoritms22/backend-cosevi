@@ -155,9 +155,14 @@ export class PayPalService {
     async createSubscription(
         planId: string,
         customId: string,
+        overrideReturnUrl?: string,
+        overrideCancelUrl?: string
     ): Promise<any> {
         const accessToken = await this.getAccessToken();
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+        const returnUrl = overrideReturnUrl || `${frontendUrl}/payment-success?registration=${customId}`;
+        const cancelUrl = overrideCancelUrl || `${frontendUrl}/payment-cancelled?registration=${customId}`;
 
         const response = await fetch(`${this.baseUrl}/v1/billing/subscriptions`, {
             method: 'POST',
@@ -174,8 +179,8 @@ export class PayPalService {
                     locale: 'es-ES',
                     shipping_preference: 'NO_SHIPPING',
                     user_action: 'SUBSCRIBE_NOW',
-                    return_url: `${frontendUrl}/payment-success?registration=${customId}`,
-                    cancel_url: `${frontendUrl}/payment-cancelled?registration=${customId}`,
+                    return_url: returnUrl,
+                    cancel_url: cancelUrl,
                 }
             }),
         });

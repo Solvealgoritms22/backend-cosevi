@@ -260,6 +260,19 @@ export class RegistrationsService {
                     currentPeriodEnd: periodEnd,
                 },
             });
+        } else if ((existingSub.status as string) === 'CANCELLED' || (existingSub.status as string) === 'EXPIRED') {
+            await this.masterClient.subscription.update({
+                where: { id: existingSub.id },
+                data: {
+                    status: 'ACTIVE' as any,
+                    paypalSubscriptionId: verifiedSubscriptionId,
+                    plan: pending.plan,
+                    amount: pending.amount,
+                    currentPeriodStart: now,
+                    currentPeriodEnd: periodEnd,
+                },
+            });
+            this.logger.log(`Subscription reactivated for existing tenant ${tenant.id} via new registration`);
         }
 
         // 3. Create Invoice Record
@@ -423,6 +436,70 @@ export class RegistrationsService {
             }
         } catch (error) {
             this.logger.error(`Failed to sync subscription plan for ${paypalSubscriptionId}: ${error.message}`);
+        }
+    }
+
+    async reactivateSubscription(tenantId: string, paypalSubscriptionId: string, planId: string) {
+        this.logger.log(`Reactivating subscription for tenant ${tenantId} with new sub ID ${paypalSubscriptionId} on plan ${planId}`);
+
+        // Find internal plan name
+        let targetPlan: string | null = null;
+        for (const [name, id] of Object.entries(PAYPAL_PLAN_IDS)) {
+            if (id === planId) {
+                targetPlan = name;
+                break;
+            }
+        }
+        if (!targetPlan) targetPlan = 'starter'; // Default fallback
+
+        const amount = PLAN_PRICES[targetPlan];
+        const now = new Date();
+        const periodEnd = new Date(now);
+        periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+        try {
+            // Update or Create Subscription
+            const existingSub = await this.masterClient.subscription.findFirst({
+                where: { tenantId }
+            });
+
+            if (existingSub) {
+                await this.masterClient.subscription.update({
+                    where: { id: existingSub.id },
+                    data: {
+                        status: 'ACTIVE' as any,
+                        paypalSubscriptionId,
+                        plan: targetPlan,
+                        amount,
+                        currentPeriodStart: now,
+                        currentPeriodEnd: periodEnd,
+                    }
+                });
+            } else {
+                await this.masterClient.subscription.create({
+                    data: {
+                        tenantId,
+                        paypalSubscriptionId,
+                        plan: targetPlan,
+                        amount,
+                        status: 'ACTIVE' as any,
+                        currentPeriodStart: now,
+                        currentPeriodEnd: periodEnd,
+                    }
+                });
+            }
+
+            // Update Tenant Plan
+            await this.masterClient.tenant.update({
+                where: { id: tenantId },
+                data: { plan: targetPlan }
+            });
+
+            this.logger.log(`Subscription reactivated successfully for tenant ${tenantId}`);
+
+        } catch (error) {
+            this.logger.error(`Failed to reactivate subscription for tenant ${tenantId}: ${error.message}`);
+            throw error;
         }
     }
 }
