@@ -460,7 +460,8 @@ export class RegistrationsService {
         try {
             // Update or Create Subscription
             const existingSub = await this.masterClient.subscription.findFirst({
-                where: { tenantId }
+                where: { tenantId },
+                orderBy: { createdAt: 'desc' }
             });
 
             if (existingSub) {
