@@ -153,12 +153,12 @@ export class BillingService {
         }
 
         const subscription = await this.masterClient.subscription.findFirst({
-            where: { tenantId, status: 'ACTIVE' },
+            where: { tenantId },
             orderBy: { createdAt: 'desc' },
         });
 
         if (!subscription) {
-            this.logger.debug(`getSubscription: No active subscription found for tenant ${tenantId}`);
+            this.logger.debug(`getSubscription: No subscription found for tenant ${tenantId}`);
             return null;
         }
 

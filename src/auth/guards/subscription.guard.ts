@@ -30,9 +30,23 @@ export class SubscriptionGuard implements CanActivate {
 
         const status = user.subscriptionStatus || 'ACTIVE';
         const method = request.method;
+        const path = request.url;
 
-        // 1. CANCELLED: Block everything except maybe some basic info or billing (if we had specific routes for it here)
+        // 0. Always allow access to billing-related endpoints for reactivation
+        if (path.includes('/billing') || path.includes('/auth/profile')) {
+            return true;
+        }
+
+        // 1. CANCELLED: Check if period has ended
         if (status === 'CANCELLED') {
+            const periodEnd = user.subscriptionPeriodEnd ? new Date(user.subscriptionPeriodEnd) : null;
+            const now = new Date();
+
+            // If periodEnd is valid and in the future, allow access (grace period)
+            if (periodEnd && periodEnd > now) {
+                return true;
+            }
+
             throw new ForbiddenException(
                 'Suscripción cancelada. Por favor, contacta a soporte o renueva tu plan.',
             );
