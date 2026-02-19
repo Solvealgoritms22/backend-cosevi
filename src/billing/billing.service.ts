@@ -359,6 +359,8 @@ export class BillingService {
             throw new BadRequestException(`Plan configuration missing for ${targetPlan}`);
         }
 
+        this.logger.log(`Initiating PayPal revision: Current Sub ID: ${subscription.paypalSubscriptionId}, Target Plan ID: ${paypalPlanId}`);
+
         try {
             const revision = await this.paypalService.reviseSubscription(
                 subscription.paypalSubscriptionId,
@@ -366,6 +368,7 @@ export class BillingService {
             );
 
             const approvalUrl = revision.links?.find((l: any) => l.rel === 'approve')?.href;
+            this.logger.log(`PayPal revision response status: ${revision.status}, Approval URL: ${approvalUrl}`);
 
             // Optional: Optimistic update or wait for webhook
             // For now, if no approval is needed, we might need to update the DB
