@@ -379,4 +379,50 @@ export class RegistrationsService {
             this.logger.error(`Failed to update subscription status for ${paypalSubscriptionId}: ${error.message}`);
         }
     }
+
+    async syncSubscriptionPlan(paypalSubscriptionId: string, paypalPlanId: string) {
+        this.logger.log(`Syncing subscription plan for ${paypalSubscriptionId} with PayPal plan ${paypalPlanId}`);
+
+        // Find the internal plan name
+        let targetPlan: string | null = null;
+        for (const [name, id] of Object.entries(PAYPAL_PLAN_IDS)) {
+            if (id === paypalPlanId) {
+                targetPlan = name;
+                break;
+            }
+        }
+
+        if (!targetPlan) {
+            this.logger.warn(`Could not map PayPal Plan ID ${paypalPlanId} to an internal plan name.`);
+            return;
+        }
+
+        const amount = PLAN_PRICES[targetPlan];
+
+        try {
+            // Update Subscription record
+            const subscription = await this.masterClient.subscription.findFirst({
+                where: { paypalSubscriptionId },
+            });
+
+            if (subscription && subscription.plan.toLowerCase() !== targetPlan) {
+                this.logger.log(`Subscription ${subscription.id} plan mismatch. Updating database from ${subscription.plan} to ${targetPlan}`);
+
+                await this.masterClient.subscription.update({
+                    where: { id: subscription.id },
+                    data: { plan: targetPlan, amount },
+                });
+
+                // Update Tenant record
+                await this.masterClient.tenant.update({
+                    where: { id: subscription.tenantId },
+                    data: { plan: targetPlan },
+                });
+
+                this.logger.log(`Tenant ${subscription.tenantId} successfully updated to plan ${targetPlan}`);
+            }
+        } catch (error) {
+            this.logger.error(`Failed to sync subscription plan for ${paypalSubscriptionId}: ${error.message}`);
+        }
+    }
 }

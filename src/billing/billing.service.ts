@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { PLAN_LIMITS } from '../auth/guards/plan.guard';
 import { PayPalService } from '../paypal/paypal.service';
+import { RegistrationsService } from '../registrations/registrations.service';
 
 const PLAN_PRICES: Record<string, number> = {
     starter: 49,
@@ -37,6 +38,7 @@ export class BillingService {
         private prisma: PrismaService,
         private tenantsService: TenantsService,
         private paypalService: PayPalService,
+        private registrationsService: RegistrationsService,
         @Inject(REQUEST) private request: Request,
     ) { }
 
@@ -165,6 +167,14 @@ export class BillingService {
             try {
                 const paypalDetails = await this.paypalService.getSubscriptionDetails(subscription.paypalSubscriptionId);
                 this.logger.log(`Subscription ${subscription.id} status in PayPal: ${paypalDetails.status}`);
+
+                // Sync plan if active
+                if (paypalDetails.status === 'ACTIVE' || paypalDetails.status === 'APPROVED') {
+                    await this.registrationsService.syncSubscriptionPlan(
+                        subscription.paypalSubscriptionId,
+                        paypalDetails.plan_id
+                    );
+                }
             } catch (err) {
                 this.logger.error(`Failed to fetch PayPal status for ${subscription.paypalSubscriptionId}: ${err.message}`);
             }

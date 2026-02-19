@@ -91,6 +91,10 @@ export class PayPalController {
                 await this.handleSubscriptionActivated(body);
                 break;
 
+            case 'BILLING.SUBSCRIPTION.UPDATED':
+                await this.handleSubscriptionUpdated(body);
+                break;
+
             case 'PAYMENT.SALE.COMPLETED':
                 await this.handlePaymentSaleCompleted(body);
                 break;
@@ -156,6 +160,20 @@ export class PayPalController {
         this.logger.log(`Payment sale completed for subscription: ${subscriptionId}`);
         // Here we would extend the period end in the Subscription table
         // For now, it will be handled when the next period start is detected
+    }
+
+    private async handleSubscriptionUpdated(body: any) {
+        const subscriptionId = body.resource?.id;
+        const planId = body.resource?.plan_id;
+        if (!subscriptionId || !planId) return;
+
+        this.logger.log(`Subscription updated via webhook: ${subscriptionId} now on plan ${planId}`);
+
+        try {
+            await this.registrationsService.syncSubscriptionPlan(subscriptionId, planId);
+        } catch (err) {
+            this.logger.error(`Webhook processing failed for subscription update ${subscriptionId}: ${err.message}`);
+        }
     }
 
     private async handleSubscriptionIssue(body: any) {
