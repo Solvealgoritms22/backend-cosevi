@@ -25,6 +25,7 @@ export class AppGateway {
 
     emitIncidentCreated(data: any, tenantId?: string) {
         const tid = tenantId || 'global';
+        // Reuse 'visits' channel for now as it's the main tenant activity channel
         const channel = this.getTenantChannel(tid, 'visits');
         this.pusherService.trigger(channel, 'incidentCreated', data);
     }

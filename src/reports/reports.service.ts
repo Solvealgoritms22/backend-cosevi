@@ -31,7 +31,12 @@ export class ReportsService {
             },
         });
         const tenantId = this.request.headers['x-tenant-id'] as string;
-        this.gateway.emitIncidentCreated(report, tenantId);
+        console.log(`[ReportsService] Creating incident for tenant: ${tenantId}`);
+        if (tenantId) {
+            this.gateway.emitIncidentCreated(report, tenantId);
+        } else {
+            console.warn('[ReportsService] Tenant ID missing in headers, skipping event emission');
+        }
         return report;
     }
 
@@ -106,7 +111,12 @@ export class ReportsService {
             },
         });
         const tenantId = this.request.headers['x-tenant-id'] as string;
-        this.gateway.emitCommentAdded({ incidentReportId, comment }, tenantId);
+        console.log(`[ReportsService] Adding comment for tenant: ${tenantId}, Report: ${incidentReportId}`);
+        if (tenantId) {
+            this.gateway.emitCommentAdded({ incidentReportId, comment }, tenantId);
+        } else {
+            console.warn('[ReportsService] Tenant ID missing in headers, skipping comment event emission');
+        }
         return comment;
     }
 
@@ -116,7 +126,12 @@ export class ReportsService {
             data: { status },
         });
         const tenantId = this.request.headers['x-tenant-id'] as string;
-        this.gateway.emitIncidentStatusUpdated(report, tenantId);
+        console.log(`[ReportsService] Updating status for tenant: ${tenantId}, Report: ${id} to ${status}`);
+        if (tenantId) {
+            this.gateway.emitIncidentStatusUpdated(report, tenantId);
+        } else {
+            console.warn('[ReportsService] Tenant ID missing in headers, skipping status event emission');
+        }
         return report;
     }
 }
