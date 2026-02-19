@@ -217,6 +217,7 @@ export class AuthService {
         const result = {
             ...user,
             subscriptionStatus,
+            subscriptionPeriodEnd: tenantId ? (await this.tenantsService.getSubscriptionStatus(tenantId)).currentPeriodEnd : null,
         };
 
         if (user?.residentProfile?.assignedSpaces) {
