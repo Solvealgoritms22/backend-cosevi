@@ -226,6 +226,7 @@ export class PayPalService {
             body: JSON.stringify({
                 plan_id: planId,
                 application_context: {
+                    brand_name: 'ENTRAR',
                     return_url: `${process.env.FRONTEND_URL}/billing?upgrade=success`,
                     cancel_url: `${process.env.FRONTEND_URL}/billing?upgrade=cancel`,
                 }
