@@ -141,14 +141,24 @@ export class BillingService {
 
     async getSubscription() {
         const tenantId = this.getTenantId();
-        if (!tenantId) return null;
+        if (!tenantId) {
+            this.logger.warn('getSubscription: No tenantId found in headers');
+            return null;
+        }
+
+        if (!process.env.MASTER_DATABASE_URL) {
+            this.logger.error('MASTER_DATABASE_URL is missing in environment variables');
+        }
 
         const subscription = await this.masterClient.subscription.findFirst({
             where: { tenantId, status: 'ACTIVE' },
             orderBy: { createdAt: 'desc' },
         });
 
-        if (!subscription) return null;
+        if (!subscription) {
+            this.logger.debug(`getSubscription: No active subscription found for tenant ${tenantId}`);
+            return null;
+        }
 
         return {
             id: subscription.id,
@@ -247,6 +257,8 @@ export class BillingService {
 
     async cancelSubscription() {
         const tenantId = this.getTenantId();
+        this.logger.debug(`Cancelling subscription for tenant: ${tenantId}`);
+
         if (!tenantId) throw new BadRequestException('Tenant ID not found');
 
         const subscription = await this.masterClient.subscription.findFirst({
@@ -254,8 +266,14 @@ export class BillingService {
             orderBy: { createdAt: 'desc' },
         });
 
-        if (!subscription || !subscription.paypalSubscriptionId) {
-            throw new NotFoundException('No active PayPal subscription found');
+        if (!subscription) {
+            const anySub = await this.masterClient.subscription.findFirst({ where: { tenantId } });
+            this.logger.warn(`No ACTIVE subscription found for tenant ${tenantId} during cancellation. Any sub? ${!!anySub}`);
+            throw new NotFoundException('No active subscription found');
+        }
+
+        if (!subscription.paypalSubscriptionId) {
+            this.logger.warn(`Subscription ${subscription.id} for tenant ${tenantId} has no PayPal ID. Performing local cancellation only.`);
         }
 
         // 1. Check for pending or urgent invoices
@@ -277,10 +295,12 @@ export class BillingService {
         }
 
         try {
-            await this.paypalService.cancelSubscription(
-                subscription.paypalSubscriptionId,
-                'Cancelled by user from dashboard'
-            );
+            if (subscription.paypalSubscriptionId) {
+                await this.paypalService.cancelSubscription(
+                    subscription.paypalSubscriptionId,
+                    'Cancelled by user from dashboard'
+                );
+            }
 
             // Update local DB status
             await this.masterClient.subscription.update({
@@ -297,6 +317,8 @@ export class BillingService {
 
     async upgradeSubscription(newPlan: string) {
         const tenantId = this.getTenantId();
+        this.logger.debug(`Upgrading subscription for tenant: ${tenantId}, target plan: ${newPlan}`);
+
         if (!tenantId) throw new BadRequestException('Tenant ID not found');
 
         const subscription = await this.masterClient.subscription.findFirst({
@@ -304,8 +326,15 @@ export class BillingService {
             orderBy: { createdAt: 'desc' },
         });
 
-        if (!subscription || !subscription.paypalSubscriptionId) {
-            throw new NotFoundException('No active PayPal subscription found');
+        if (!subscription) {
+            const anySub = await this.masterClient.subscription.findFirst({ where: { tenantId } });
+            this.logger.warn(`No ACTIVE subscription found for tenant ${tenantId}. Any sub exists? ${!!anySub}`);
+            throw new NotFoundException('No active subscription found');
+        }
+
+        if (!subscription.paypalSubscriptionId) {
+            this.logger.warn(`Subscription ${subscription.id} found for tenant ${tenantId} but has no paypalSubscriptionId. Upgrade blocked.`);
+            throw new BadRequestException('UPGRADE_BLOCKED_MANUAL_PLAN');
         }
 
         const currentPlan = subscription.plan.toLowerCase();

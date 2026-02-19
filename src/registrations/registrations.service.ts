@@ -193,10 +193,11 @@ export class RegistrationsService {
 
         // --- PAYPAL SUBSCRIPTION VERIFICATION ---
         let subscriptionDetails: any;
+        const verifiedSubscriptionId = pending.paypalSubscriptionId || paypalToken;
+
         try {
-            const subscriptionId = pending.paypalSubscriptionId || paypalToken;
-            this.logger.log(`Verifying subscription ${subscriptionId} for registration ${registrationId}`);
-            subscriptionDetails = await this.paypalService.getSubscriptionDetails(subscriptionId);
+            this.logger.log(`Verifying subscription ${verifiedSubscriptionId} for registration ${registrationId}`);
+            subscriptionDetails = await this.paypalService.getSubscriptionDetails(verifiedSubscriptionId);
         } catch (error) {
             this.logger.error(`Subscription verification failed: ${error.message}`);
             throw new BadRequestException('Error al verificar la suscripción con PayPal. Verifica tu cuenta o intenta más tarde.');
@@ -211,10 +212,12 @@ export class RegistrationsService {
         this.logger.log(`Finalizing account creation for ${pending.email}`);
 
         // Update status immediately (atomic-ish)
-        // Update status immediately (atomic-ish)
         await this.masterClient.pendingRegistration.update({
             where: { id: pending.id },
-            data: { status: 'PAID' },
+            data: {
+                status: 'PAID',
+                paypalSubscriptionId: verifiedSubscriptionId // Store it if it was missing
+            },
         });
 
         // 1. Create/Find Tenant
@@ -252,7 +255,7 @@ export class RegistrationsService {
                     plan: pending.plan,
                     amount: pending.amount,
                     status: 'ACTIVE',
-                    paypalSubscriptionId: pending.paypalSubscriptionId,
+                    paypalSubscriptionId: verifiedSubscriptionId,
                     currentPeriodStart: now,
                     currentPeriodEnd: periodEnd,
                 },
@@ -260,7 +263,7 @@ export class RegistrationsService {
         }
 
         // 3. Create Invoice Record
-        const paypalPaymentId = pending.paypalSubscriptionId || 'SUBSCRIPTION-ACT';
+        const paypalPaymentId = verifiedSubscriptionId;
         const existingInvoice = await this.masterClient.invoice.findFirst({
             where: { tenantId: tenant.id, totalAmount: pending.amount }
         });
