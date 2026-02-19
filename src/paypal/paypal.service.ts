@@ -220,6 +220,10 @@ export class PayPalService {
             },
             body: JSON.stringify({
                 plan_id: planId,
+                application_context: {
+                    return_url: `${process.env.FRONTEND_URL}/billing?upgrade=success`,
+                    cancel_url: `${process.env.FRONTEND_URL}/billing?upgrade=cancel`,
+                }
             }),
         });
 
