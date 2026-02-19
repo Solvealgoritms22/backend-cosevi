@@ -15,13 +15,13 @@ const PLAN_PRICES: Record<string, number> = {
 };
 
 const OVERAGE_RATES: Record<string, number> = {
-    units: 1.50,
-    parking: 0.75,
-    monitors: 10.00,
-    security: 5.00,
-    visits: 0.25,
-    alerts: 0.50,
-    reports: 1.00,
+    units: 0.25,
+    parking: 0.10,
+    monitors: 1.00,
+    security: 0.50,
+    visits: 0.01,
+    alerts: 0.02,
+    reports: 0.05,
 };
 
 // Use a shared client to avoid connection leaks in request-scoped service
