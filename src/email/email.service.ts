@@ -1,18 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import * as dns from 'dns';
 
 @Injectable()
 export class EmailService {
+    private readonly logger = new Logger(EmailService.name);
     private transporter: nodemailer.Transporter;
 
     constructor() {
-        console.log('Email Service Config:', {
+        this.logger.log('Email Service Config: ' + JSON.stringify({
             host: process.env.EMAIL_HOST,
             port: process.env.EMAIL_PORT,
             user: process.env.EMAIL_USER,
             hasPass: !!process.env.EMAIL_PASS
-        });
+        }));
         this.transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -40,7 +41,7 @@ export class EmailService {
             hour: '2-digit', minute: '2-digit',
         });
 
-        console.log(`Attempting to send payment link to ${to}...`);
+        this.logger.log(`Attempting to send payment link to ${to}...`);
         try {
             const info = await this.transporter.sendMail({
                 from: `"ENTRAR" <${process.env.EMAIL_USER}>`,
@@ -90,15 +91,15 @@ export class EmailService {
                 </div>
             `,
             });
-            console.log(`Payment link sent to ${to}: ${info.messageId}`);
-        } catch (error) {
-            console.error(`Error sending payment link to ${to}:`, error);
+            this.logger.log(`Payment link sent to ${to}: ${info.messageId}`);
+        } catch (error: any) {
+            this.logger.error(`Error sending payment link to ${to}: ${error.message}`, error.stack);
             throw error;
         }
     }
 
     async sendWelcome(to: string, name: string, plan: string) {
-        console.log(`Attempting to send welcome email to ${to}...`);
+        this.logger.log(`Attempting to send welcome email to ${to}...`);
         try {
             const info = await this.transporter.sendMail({
                 from: `"ENTRAR" <${process.env.EMAIL_USER}>`,
@@ -130,9 +131,9 @@ export class EmailService {
                 </div>
             `,
             });
-            console.log(`Welcome email sent to ${to}: ${info.messageId}`);
-        } catch (error) {
-            console.error(`Error sending welcome email to ${to}:`, error);
+            this.logger.log(`Welcome email sent to ${to}: ${info.messageId}`);
+        } catch (error: any) {
+            this.logger.error(`Error sending welcome email to ${to}: ${error.message}`, error.stack);
             throw error;
         }
     }
@@ -170,7 +171,7 @@ export class EmailService {
             }
         }
 
-        console.log(`Attempting to send invoice to ${to}...`);
+        this.logger.log(`Attempting to send invoice to ${to}...`);
         try {
             const info = await this.transporter.sendMail({
                 from: `"ENTRA" <${process.env.EMAIL_USER}>`,
@@ -207,9 +208,9 @@ export class EmailService {
                 </div>
             `,
             });
-            console.log(`Invoice sent to ${to}: ${info.messageId}`);
-        } catch (error) {
-            console.error(`Error sending invoice to ${to}:`, error);
+            this.logger.log(`Invoice sent to ${to}: ${info.messageId}`);
+        } catch (error: any) {
+            this.logger.error(`Error sending invoice to ${to}: ${error.message}`, error.stack);
             throw error;
         }
     }
@@ -218,7 +219,7 @@ export class EmailService {
         const baseUrl = (process.env.FRONTEND_URL || 'http://localhost:3001').replace(/\/$/, '');
         const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
-        console.log(`Attempting to send password reset email to ${to}...`);
+        this.logger.log(`Attempting to send password reset email to ${to}...`);
         try {
             const info = await this.transporter.sendMail({
                 from: `"ENTRAR Soporte" <${process.env.EMAIL_USER}>`,
@@ -250,9 +251,9 @@ export class EmailService {
                 </div>
             `,
             });
-            console.log(`Password reset email sent to ${to}: ${info.messageId}`);
-        } catch (error) {
-            console.error(`Error sending password reset email to ${to}:`, error);
+            this.logger.log(`Password reset email sent to ${to}: ${info.messageId}`);
+        } catch (error: any) {
+            this.logger.error(`Error sending password reset email to ${to}: ${error.message}`, error.stack);
             throw error;
         }
     }

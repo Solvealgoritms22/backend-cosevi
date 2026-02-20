@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma.service';
 import { UsersService } from '../users/users.service';
@@ -12,6 +12,7 @@ import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger(AuthService.name);
     constructor(
         private prisma: PrismaService,
         private usersService: UsersService,
@@ -25,12 +26,12 @@ export class AuthService {
         const tenantId = (this.prisma as any).request?.headers?.['x-tenant-id'];
 
         if (!tenantId) {
-            console.log(`[AuthService] No x-tenant-id header found. Attempting auto-discovery for ${email}`);
+            this.logger.log(`[AuthService] No x-tenant-id header found. Attempting auto-discovery for ${email}`);
 
             // 1. Try Global User Map (covers all users)
             const globalUser = await this.tenantsService.getGlobalUser(email);
             if (globalUser) {
-                console.log(`[AuthService] Auto-discovered tenant ${globalUser.tenantId} via GlobalUserMap for ${email}`);
+                this.logger.log(`[AuthService] Auto-discovered tenant ${globalUser.tenantId} via GlobalUserMap for ${email}`);
                 if ((this.prisma as any).request) {
                     (this.prisma as any).request.headers['x-tenant-id'] = globalUser.tenantId;
                 }
@@ -38,12 +39,12 @@ export class AuthService {
                 // 2. Fallback to Admin Email lookup (legacy/migration)
                 const tenant = await this.tenantsService.getTenantByAdminEmail(email);
                 if (tenant) {
-                    console.log(`[AuthService] Auto-discovered tenant ${tenant.id} via AdminEmail for ${email}`);
+                    this.logger.log(`[AuthService] Auto-discovered tenant ${tenant.id} via AdminEmail for ${email}`);
                     if ((this.prisma as any).request) {
                         (this.prisma as any).request.headers['x-tenant-id'] = tenant.id;
                     }
                 } else {
-                    console.warn(`[AuthService] Could not auto-discover tenant for ${email}`);
+                    this.logger.warn(`[AuthService] Could not auto-discover tenant for ${email}`);
                 }
             }
         }
@@ -135,7 +136,7 @@ export class AuthService {
 
         if (userData.role === 'ADMIN' && organizationName) {
             try {
-                console.log(`[AuthService] Creating tenant for: ${organizationName}`);
+                this.logger.log(`[AuthService] Creating tenant for: ${organizationName}`);
                 const subdomain = organizationName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
                 const newTenant = await this.tenantsService.createTenant({
@@ -147,13 +148,13 @@ export class AuthService {
                 });
 
                 tenantId = newTenant.id;
-                console.log(`[AuthService] Tenant created: ${tenantId}`);
+                this.logger.log(`[AuthService] Tenant created: ${tenantId}`);
             } catch (error) {
-                console.error('[AuthService] Tenant creation failed:', error);
+                this.logger.error(`[AuthService] Tenant creation failed: ${error.message}`);
                 throw new InternalServerErrorException('Error initializing organization: ' + error.message);
             }
         } else {
-            console.log('[AuthService] Standard registration (no tenant created)', { role: userData.role, hasOrg: !!organizationName });
+            this.logger.log(`[AuthService] Standard registration (no tenant created). Role: ${userData.role}, hasOrg: ${!!organizationName}`);
         }
 
         // 2. Set the tenant-id header for this specific registration request 
@@ -180,7 +181,7 @@ export class AuthService {
                 tenantId
             };
         } catch (error) {
-            console.error('[AuthService] User creation failed:', error);
+            this.logger.error(`[AuthService] User creation failed: ${error.message}`, error.stack);
             if (error.code === 'P2002' || error.message?.includes('Unique constraint')) {
                 throw new BadRequestException('The email address is already registered.');
             }

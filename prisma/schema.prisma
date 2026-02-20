@@ -124,6 +124,8 @@ model IncidentReport {
   updatedAt   DateTime @updatedAt
   reporter    User     @relation(fields: [reporterId], references: [id])
   comments    IncidentComment[]
+
+  @@index([status, createdAt])
 }
 
 model EmergencyAlert {
@@ -149,6 +151,8 @@ model Space {
   updatedAt         DateTime         @updatedAt
   visit             Visit?           @relation("VisitToSpace", fields: [visitId], references: [id])
   residentProfile   ResidentProfile? @relation(fields: [residentProfileId], references: [id])
+
+  @@index([status])
 }
 
 model AccessLog {
@@ -159,6 +163,9 @@ model AccessLog {
   direction   String
   timestamp   DateTime @default(now())
   snapshotUrl String?
+
+  @@index([timestamp])
+  @@index([checkpoint])
 }
 
 model Notification {
@@ -230,6 +237,8 @@ model HardwareEvent {
   data        Json?          // e.g., { "plate": "ABC1234", "confidence": 0.98 }
   timestamp   DateTime       @default(now())
   device      HardwareDevice @relation(fields: [deviceId], references: [id])
+
+  @@index([deviceId, timestamp])
 }
 
 model IotCommand {
@@ -241,6 +250,8 @@ model IotCommand {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
   device    HardwareDevice @relation(fields: [deviceId], references: [id])
+
+  @@index([deviceId, status])
 }
 
 // Master Schema Models (Merged)
